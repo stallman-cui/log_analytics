@@ -1,0 +1,1 @@
+{"login_logcount": ["server"], "signup_logcount": ["server"], "create_role_logcount": ["server"], "gamelog": ["login_logcount", "signup_logcount", "create_role_logcount"]}
