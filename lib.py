@@ -4,14 +4,14 @@ import time
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
 PUBTITLE = {
-    'gamelog' : '1001',
-    'login' : '1002',
-    'signup' : '1003', 
-    'create_role' : '1004',
-    'server' : '1005',
+    'login_logcount' : '1001',
+    'signup_logcount' : '1003', 
+    'createrole_logcount' : '1004',
+    'login' : '1005',
+    'signup' : '1006',
+    'createrole' : '1007',
+    'server' : '1008',
 }
-
-
 
 def gamelog_parse(line):
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
@@ -32,3 +32,14 @@ def gamelog_parse(line):
                 'data' : data
             }
             return gamelog
+
+def gamelog_filter(gamelog_tuple):
+    global num
+    opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount', 
+              'logout_logcount',
+              'yuanbao_logchange', 'shop_subyuanbao', 
+              'fuben_logchange', 'trunk_task_accept', 'trunk_task_finish', 
+             ]
+    if not gamelog_tuple['op']['code'] in opnode:
+        return
+    return gamelog_tuple

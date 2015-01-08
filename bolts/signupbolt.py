@@ -4,7 +4,7 @@ import json
 from lib import PUBTITLE
 from bolt import Bolt
 
-class LoginBolt(Bolt):
+class SignupBolt(Bolt):
     ''' handle the login log from gamelog
     '''
     num = 0
@@ -22,7 +22,7 @@ class LoginBolt(Bolt):
         self.context = zmq.Context()
         self.recv_socket = self.context.socket(zmq.SUB)
         self.recv_socket.connect("tcp://127.0.0.1:5001")
-        self.topicfilter = PUBTITLE['gamelog']
+        self.topicfilter = PUBTITLE['signup_logcount']
         self.recv_socket.setsockopt(zmq.SUBSCRIBE, self.topicfilter)
 
         self.send_socket = self.context.socket(zmq.REQ)
@@ -36,8 +36,8 @@ class LoginBolt(Bolt):
             #topic = input[0:4]
             recv_tuple = input[4:]
             recv_tuple = json.loads(recv_tuple)
-            #print('login execute: %d ' % LoginBolt.num)
-            LoginBolt.num += 1
+            #print('Signup execute: %d ' % SignupBolt.num)
+            SignupBolt.num += 1
             
             try:
                 area = recv_tuple['body']['area']
@@ -52,11 +52,11 @@ class LoginBolt(Bolt):
                 'plat' : plat,
                 'userlist' : [acctid,],
             }
-            recv_tuple['state'] = "login"
+            recv_tuple['state'] = "signup"
             #print(json.dumps(recv_tuple, indent=3))
             self.send_socket.send(json.dumps(recv_tuple))
             ack_result = self.send_socket.recv()
-            print('Login processed messsage id: %d' % int(ack_result))
+            print('Signup processed messsage id: %d' % int(ack_result))
 
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''
