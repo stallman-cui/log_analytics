@@ -2,8 +2,9 @@
 import etcd
 import time
 import json
-import config
 import yaml
+
+from configs import config
 
 class topology(object):
     def __init__(self, ):

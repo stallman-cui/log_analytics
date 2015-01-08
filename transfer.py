@@ -4,7 +4,7 @@ import zmq.green as zmq
 import json
 from gevent.queue import Queue
 
-from lib import PUBTITLE
+from configs.config import PUBTITLE
 from spouts.gamelogspout import GamelogSpout
 from bolts.loginbolt import LoginBolt
 from bolts.serverbolt import ServerBolt

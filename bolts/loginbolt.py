@@ -1,7 +1,7 @@
 import zmq.green as zmq
 import json
 
-from lib import PUBTITLE
+from configs.config import PUBTITLE
 from bolt import Bolt
 
 class LoginBolt(Bolt):
