@@ -3,6 +3,16 @@ import json
 import time
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
+PUBTITLE = {
+    'gamelog' : '1001',
+    'login' : '1002',
+    'signup' : '1003', 
+    'create_role' : '1004',
+    'server' : '1005',
+}
+
+
+
 def gamelog_parse(line):
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
     if m:

@@ -34,7 +34,8 @@ class GamelogSpout(Spout):
         ''' When this method is called, the spout emit 
         tuples to the output collector. 
         '''
-        with open('/home/cui/gamelog.txt', 'r') as f:
+        #with open('/home/cui/gamelog.txt', 'r') as f:
+        with open('gamelog_20150108.txt', 'r') as f:
             for line in f:
                 line = gamelog_parse(line)
                 if line:
@@ -55,9 +56,9 @@ class GamelogSpout(Spout):
         
     def ack(self, msg_id):
         ''' The tuple emiited by this spout with the msg_id has been fully processed. '''
-        print("Client's request was Sucessed %d \n" % int(msg_id))
+        print("Gamelog: request was Sucessed, messsage_id: %d \n" % int(msg_id))
 
     def fail(self, msg_id):
         ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
 
-        print("Client's request was Failed %d \n" % int(msg_id))
+        print("Gamelog: request was Failed, messsage_id: %d \n" % int(msg_id))
