@@ -9,6 +9,8 @@ from spouts.gamelogspout import GamelogSpout
 from bolts.loginbolt import LoginBolt
 from bolts.serverbolt import ServerBolt
 from bolts.signupbolt import SignupBolt
+from bolts.createrolebolt import CreateroleBolt
+#from bolts.mongobolt import MongoBolt
 
 login = LoginBolt()
 server = ServerBolt()
@@ -45,23 +47,19 @@ def receiver():
     global messages
 
     while True:
-        message_tuple = server_socket.recv()
+        message_tuple = server_socket.recv_json()
         if message_tuple:
-            message_tuple = json.loads(message_tuple)
-            #if not messages.full():
             messages.put_nowait(message_tuple)
-            #print('Receiver: put-messages size: %d' % messages.qsize())
-            #print("Receiver: received the request: messsage_id: %d " % message_tuple['id'])
             server_socket.send(str(message_tuple['id']))
         else:
-            server_socket.send('Error')
+            server_socket.send_string('Error')
 
 # generate a data source
 def make_spout(spoutclass=GamelogSpout):
     spout = spoutclass()
     while True:
         spout.next_tuple()
-        gevent.sleep(20)
+        gevent.sleep(1800)
 
 # generate a data process
 def make_bolt(boltclass):
@@ -74,7 +72,8 @@ coroutines = []
 coroutines.append(gevent.spawn(receiver))
 coroutines.append(gevent.spawn(sender))
 
-all_bolts = [LoginBolt, ServerBolt, SignupBolt,]
+#all_bolts = [LoginBolt, ServerBolt, SignupBolt, CreateroleBolt,]
+all_bolts = [LoginBolt, ServerBolt,]
 all_spouts = [GamelogSpout,]
 
 for each_bolt in all_bolts:

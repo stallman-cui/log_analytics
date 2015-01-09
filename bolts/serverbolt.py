@@ -1,15 +1,20 @@
 import zmq.green as zmq
 import json
+import logging
 
 from configs.config import PUBTITLE
-from bolt import Bolt
+from bolts.bolt import Bolt
+from models.servermodel import ServerModel
 
 class ServerBolt(Bolt):
-    ''' handle the login log from gamelog
+    ''' Collect the login, signup, createrole, payment
+    for area and plat analytics
     '''
     num = 0
     def __init__(self):
         self.prepare()
+        self.logger = logging.getLogger('online_analytics')
+        self.model = ServerModel()
 
     def prepare(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is Initialized
@@ -37,35 +42,16 @@ class ServerBolt(Bolt):
             #topic = input[0:4]
             recv_tuple = input[4:]
             recv_tuple = json.loads(recv_tuple)
-            #print('server execute: %d ' % ServerBolt.num)
+            #logging.debug('server execute: %d ', ServerBolt.num)
             ServerBolt.num += 1
             
-            try:
-                area = recv_tuple['body']['area']
-                plat = recv_tuple['body']['plat']
-            except KeyError as e:
-               print('message: %d KeyError: %s' % (recv_tuple['id'],str(e)))
-               return
-
-            body = {
-                'area' : area,
-                'plat' : plat,
-            }
-            if recv_tuple['state'] == 'login':
-                body['login_userlist'] = recv_tuple['body']['userlist']
-
-            if recv_tuple['state'] == 'signup':
-                body['signup_userlist'] = recv_tuple['body']['userlist']
-
-            if recv_tuple['state'] == 'create_role':
-                body['createrole_userlist'] = recv_tuple['body']['userlist']
-
+            body = self.model.handle(recv_tuple['body'])
             recv_tuple['state'] = "server"
             recv_tuple['body'] = body
-            #print(json.dumps(recv_tuple, indent=3))
-            self.send_socket.send(json.dumps(recv_tuple))
+
+            self.send_socket.send_json(recv_tuple)
             ack_result = self.send_socket.recv()
-            print('Server processed messsage id: %d' % int(ack_result))
+            self.logger.debug('%-10s processed messsage id:  %d', 'Server', int(ack_result))
 
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''
