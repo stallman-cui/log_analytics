@@ -4,7 +4,7 @@ import logging
 
 from configs.config import PUBTITLE
 from bolts.bolt import Bolt
-from lib import get_ts
+from models.createrolemodel import CreateroleModel
 
 class CreateroleBolt(Bolt):
     ''' handle the login log from gamelog
@@ -13,6 +13,7 @@ class CreateroleBolt(Bolt):
     def __init__(self):
         self.logger = logging.getLogger('online_analytics')
         self.prepare()
+        self.model = CreateroleModel()
 
     def prepare(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is Initialized
@@ -41,21 +42,9 @@ class CreateroleBolt(Bolt):
             recv_tuple = json.loads(recv_tuple)
             #logging.debug('createrole execute: %d ', CreateroleBolt.num)
             CreateroleBolt.num += 1
-            
-            try:
-                area = recv_tuple['body']['area']
-                plat = recv_tuple['body']['data']['corpid']
-                acctid = recv_tuple['body']['data']['acct']
-            except KeyError as e:
-                self.logger.error('message: %d KeyError: %s', recv_tuple['id'], str(e))
-                return
-                
-            recv_tuple['body'] = {
-                'area' : area,
-                'plat' : plat,
-                'ts' : get_ts(),
-                'user' : acctid
-            }
+
+            body = self.model.handle(recv_tuple['body'])
+            recv_tuple['body'] = body
             recv_tuple['state'] = "createrole"
             #print(json.dumps(recv_tuple, indent=3))
             self.send_socket.send_json(recv_tuple)

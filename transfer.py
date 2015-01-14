@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 import gevent
 import zmq.green as zmq
-import json
 from gevent.queue import Queue
+import json
 
 from configs.config import PUBTITLE
-from spouts.gamelogspout import GamelogSpout
-from bolts.loginbolt import LoginBolt
-from bolts.serverbolt import ServerBolt
-from bolts.signupbolt import SignupBolt
-from bolts.createrolebolt import CreateroleBolt
-#from bolts.mongobolt import MongoBolt
+from spouts.basespout import BaseSpout
+from bolts.basebolt import BaseBolt
 
-login = LoginBolt()
-server = ServerBolt()
+from models.signupmodel import SignupModel
+from models.loginmodel import LoginModel
+from models.createrolemodel import CreateroleModel
+from models.payorderusermodel import PayorderUserModel
+from models.servermodel import ServerModel
+
+from models.gamelogmodel import GamelogModel
+from models.paymentmodel import PaymentModel
+
 context = zmq.Context()
 messages = Queue()
 
@@ -22,21 +25,20 @@ def sender():
     send_socket = context.socket(zmq.PUB)
     send_socket.bind("tcp://127.0.0.1:5001")
     global messages
-
     while True:
         if not messages.empty():
             message_tuple = messages.get_nowait()
             #print('Sender: send the message_id: %d' % message_tuple['id'])
             if message_tuple['state'] == 'gamelog':
-                #print(message_tuple['body']['op']['code'])
                 try:
                     topic = PUBTITLE[message_tuple['body']['op']['code']]
                 except:
-                    #print('Sender: we do not care: %s' % str(e))
                     continue
             else:
                 topic = PUBTITLE[message_tuple['state']]
             send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
+        #else:
+        #    print('message queue: ', time.time(),  messages.qsize())
 
         gevent.sleep(0.01)
 
@@ -45,7 +47,6 @@ def receiver():
     server_socket = context.socket(zmq.REP)
     server_socket.bind("tcp://127.0.0.1:5000")
     global messages
-
     while True:
         message_tuple = server_socket.recv_json()
         if message_tuple:
@@ -54,32 +55,32 @@ def receiver():
         else:
             server_socket.send_string('Error')
 
-# generate a data source
-def make_spout(spoutclass=GamelogSpout):
-    spout = spoutclass()
-    while True:
-        spout.next_tuple()
-        gevent.sleep(1800)
-
 # generate a data process
-def make_bolt(boltclass):
-    bolt = boltclass()
+def make_bolt(model):
+    bolt = BaseBolt(model)
     while True:
         bolt.execute()
         gevent.sleep(0.1)
+
+def make_spout(model):
+    spout = BaseSpout(model)
+    while True:
+        spout.next_tuple()
+        gevent.sleep(3600)
 
 coroutines = []
 coroutines.append(gevent.spawn(receiver))
 coroutines.append(gevent.spawn(sender))
 
-#all_bolts = [LoginBolt, ServerBolt, SignupBolt, CreateroleBolt,]
-all_bolts = [LoginBolt, ServerBolt,]
-all_spouts = [GamelogSpout,]
+all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
+                   PayorderUserModel, ServerModel,
+]
+all_spout_models = [GamelogModel, PaymentModel,]
 
-for each_bolt in all_bolts:
-    coroutines.append(gevent.spawn(make_bolt, each_bolt))
+for each_model in all_bolt_models:
+    coroutines.append(gevent.spawn(make_bolt, each_model))
 
-for each_spout in all_spouts:
-    coroutines.append(gevent.spawn(make_spout, each_spout))
+for each_model in all_spout_models:
+    coroutines.append(gevent.spawn(make_spout, each_model))
 
 gevent.joinall(coroutines)

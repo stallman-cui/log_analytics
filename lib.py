@@ -3,8 +3,6 @@ import json
 import time
 import logging
 
-from configs.config import DB_NAME
-
 def gamelog_parse(line):
     FORMAT = '%Y-%m-%d %H:%M:%S'
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
@@ -14,7 +12,6 @@ def gamelog_parse(line):
             area = m.group(1)
             ts = time.strptime(m.group(2), FORMAT)
             ts = int(time.mktime(ts))
-            global MAX, num
             gamelog = {
                 'op' : {
                     'code' : data['opname'],
@@ -27,7 +24,6 @@ def gamelog_parse(line):
             return gamelog
 
 def gamelog_filter(gamelog_tuple):
-    global num
     opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount', 
               'logout_logcount',
               'yuanbao_logchange', 'shop_subyuanbao', 
@@ -37,21 +33,29 @@ def gamelog_filter(gamelog_tuple):
         return
     return gamelog_tuple
 
-def get_ts(time_str = "", interval = 'hour'):
+def get_ts(timestamp='', interval = 'hour'):
+    if interval == 'hour':
+        unit = 60 * 60
+    else:
+        unit = 24 * 60 * 60
+    now = int(timestamp) / unit * unit - 8 * 3600
+    return now
+
+def get_period_ts(time_str='', interval='hour'):
     if interval == 'hour':
         formatter = '%Y-%m-%d %H:00:00'
+        diff = 3599
     else:
         formatter = '%Y-%m-%d'
+        diff = 24 * 3600 - 1
     if not time_str:
-        now = time.strftime(formatter, time.localtime())
-    else:
-        now = time_str
-
-    return int(time.mktime(time.strptime(now, formatter)))
-
-
-#def log(filename,  info = "start ..."):
-#    print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), os.path.abspath(filename), info)
+        time_str = time.strftime(formatter, time.localtime())
+    start = int(time.mktime(time.strptime(time_str, formatter))) 
+    ts = {
+        'start' : start,
+        'end' : start + diff
+    }
+    return ts
     
 def log_config():
     logger = logging.getLogger('online_analytics')
@@ -68,13 +72,3 @@ def log_config():
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
-
-def get_db(db_key):
-    if db_key:
-        return DB_NAME[db_key]['db']
-
-def get_collection(db_key):
-    if db_key:
-        return DB_NAME[db_key]['coll']
-
-

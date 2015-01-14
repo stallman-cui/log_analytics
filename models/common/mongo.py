@@ -40,9 +40,12 @@ class MongoModel:
         search = {'_id' : ObjectId(id_str)}
         return self.conn[db][coll].update(search, {'$set': change})
 
-    def upsert(self, search, data):
+    def upsert(self, data):
         db = self.prefix + self.get_db()
         coll = self.get_collection()
+        search = {}
+        for key in self.get_keys():
+            search[key] = data[key]
         return self.conn[db][coll].update(search, data, upsert = True)
     
     def get_list(self, search = {}, display = {}):
