@@ -1,10 +1,9 @@
 import zmq.green as zmq
 import logging
 
-from spouts.spout import Spout
 from lib import gamelog_parse, gamelog_filter
 
-class GamelogSpout(Spout):
+class GamelogCmd():
     """ read the gamelog data,
     and send it
     """
@@ -21,23 +20,13 @@ class GamelogSpout(Spout):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://127.0.0.1:5000")
 
-
-    def close(self):
-        ''' Called when an spout is going to be shutdown. '''
-
-    def activate(self):
-        ''' Called when a spout has been activated out of a deactivated mode. '''
-        
-    def deactivate(self):
-        ''' Called when a spout has been deactivated'''
-        
     def next_tuple(self):
         ''' When this method is called, the spout emit 
         tuples to the output collector. 
         '''
         #gamelog = 'gamelog.txt'
         #gamelog = 'gamelog_20150108.txt'
-        gamelog = 'gamelog_2015-60.txt'
+        gamelog = '/home/cui/log_analytics/gamelog_2015-60.txt'
         with open(gamelog, 'r') as f:
             self.logger.info('%-10s Starting read the gamelog ...', 'Gamelog')
             for line in f:
@@ -46,11 +35,11 @@ class GamelogSpout(Spout):
                     line = gamelog_filter(line)
                     if line:
                         message_tuple = {
-                            'id' : GamelogSpout.message_id % GamelogSpout.MAX,
+                            'id' : GamelogCmd.message_id % GamelogCmd.MAX,
                             'body' : line,
                             'state' : "gamelog"
                         }
-                        GamelogSpout.message_id += 1
+                        GamelogCmd.message_id += 1
                         #print message_tuple
                         self.socket.send_json(message_tuple)
                         ack_no = self.socket.recv_string()
@@ -68,3 +57,8 @@ class GamelogSpout(Spout):
         ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
 
         print("Gamelog: request was Failed, messsage_id: %d \n" % int(msg_id))
+
+
+if __name__ == '__main__':
+    cmd = GamelogCmd()
+    cmd.next_tuple()

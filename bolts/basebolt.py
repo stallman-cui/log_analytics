@@ -50,7 +50,7 @@ class BaseBolt(Bolt):
             recv_tuple['state'] = self.conf['state']
             self.send_socket.send_json(recv_tuple)
             ack_result = self.send_socket.recv()
-            #self.logger.debug('%-25s processed messsage id:  %d', self.model.__module__, int(ack_result))
+            self.logger.info('%-25s processed messsage id:  %d', self.model.__module__, int(ack_result))
 
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''

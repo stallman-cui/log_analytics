@@ -1,8 +1,6 @@
 import zmq.green as zmq
 import logging
-
 from spouts.spout import Spout
-#from lib import gamelog_parse, gamelog_filter
 
 class BaseSpout(Spout):
     """ read the payment data,
@@ -36,7 +34,7 @@ class BaseSpout(Spout):
         ''' When this method is called, the spout emit 
         tuples to the output collector. 
         '''
-        self.logger.info('%-10s Starting read ...', self.model.__module__)
+        self.logger.info('%-10s Starting read ... ', self.model.__module__)
         all_data = self.model.get_data()
         for line in all_data:
             message_tuple = {
@@ -45,14 +43,12 @@ class BaseSpout(Spout):
                 'state' : self.conf['state']
             }
             BaseSpout.message_id += 1
-            #print message_tuple
             self.socket.send_json(message_tuple)
             ack_no = self.socket.recv_string()
             if ack_no == str(message_tuple['id']):
                 self.ack(ack_no)
             else:
                 self.fail(ack_no)
-
         self.logger.info('%-10s End the read ...', self.model.__module__)
 
     def ack(self, msg_id):
