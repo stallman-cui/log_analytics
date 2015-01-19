@@ -10,13 +10,13 @@ from configs.config import DB_CONN
 
 class MongoModel:
         
-    def connection(self, name):
+    def connect(self, name):
         uri = DB_CONN['mongo_db'][name]['uri']
         self.prefix = DB_CONN['mongo_db'][name]['prefix']
         return MongoClient(uri)
    
     def __init__(self, name = 'default'):
-        self.conn = self.connection(name)
+        self.conn = self.connect(name)
          
     def get_db(self):
         pass

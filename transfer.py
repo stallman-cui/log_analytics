@@ -19,14 +19,14 @@ from models.createrolemodel import CreateroleModel
 from models.payorderusermodel import PayorderUserModel
 from models.servermodel import ServerModel
 
-class Analytics(Daemon):
+class Transfer(Daemon):
     def __init__(self, pidfile):
         Daemon.__init__(self, pidfile)
         self.context = zmq.Context()
         self.messages = Queue()
         self.logger = logging.getLogger('online_analytics')
 
-    # Publish the Analytics.messages
+    # Publish all the messages
     def sender(self):
         send_socket = self.context.socket(zmq.PUB)
         send_socket.bind("tcp://127.0.0.1:5001")
@@ -42,11 +42,10 @@ class Analytics(Daemon):
                     topic = PUBTITLE[message_tuple['state']]
                 send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
             #else:
-            #    print('message queue: ', time.time(),  Analytics.messages.qsize())
-
+            #    self.logger.debug('messages queue is empty, may be all the request id done')
             gevent.sleep(0.01)
 
-    # Receive the Analytics.messages        
+    # Collect all the messages        
     def receiver(self):
         server_socket = self.context.socket(zmq.REP)
         server_socket.bind("tcp://127.0.0.1:5000")
@@ -93,7 +92,7 @@ class Analytics(Daemon):
         self.init_coroutines()
 
 if __name__ == "__main__":
-    online_analytics = Analytics('/home/cui/log_analytics/log.pid')
+    online_analytics = Transfer('/home/cui/log_analytics/log.pid')
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             online_analytics.start()

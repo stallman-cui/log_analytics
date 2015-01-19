@@ -93,7 +93,7 @@ class PaymentModel:
             'end' : ts['end'],
             'page.index' : -1
         }
-        print(search)
+        #print(search)
         data = self.get_user_payment_list(search)
         if data['status'] != 500:
             pmresult = json.loads(data['body'])
@@ -132,7 +132,7 @@ class PaymentModel:
                 else:
                     user_pay_list[game][area][plat][d['user']]['times'] += 1
                     user_pay_list[game][area][plat][d['user']]['amount'] += float(d['rmb'])
-                    
+                
             result = []
             for kgame, vgame in user_pay_list.items():
                 for karea, varea in vgame.items():
@@ -142,7 +142,6 @@ class PaymentModel:
                             'area' : karea,
                             'plat' : str(kplat),
                             'ts' : ts['start'],
-                            'ts' : 1420646400,
                             'users': vplat
                         }
                         result.append(search)

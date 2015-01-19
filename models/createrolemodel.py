@@ -42,12 +42,10 @@ class CreateroleModel(MongoModel):
                     search['userlist'].append(acctid)
                     search['count'] += 1
                     self.update(mid, search)
-                    search['new'] = True
             else:
                 search['count'] = 1
                 search['userlist'] = [acctid,]
                 self.insert(search)
-                search['new'] = True
 
             if search.get('_id', 0):
                del search['_id'] 

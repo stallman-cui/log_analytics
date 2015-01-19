@@ -37,17 +37,15 @@ class SignupModel(MongoModel):
                 userlist = __id['userlist']
                 mid = str(__id['_id'])
                 search['count'] = __id['count']
+                search['userlist'] = userlist
                 if acctid not in userlist:
-                    search['userlist'] = userlist
                     search['userlist'].append(acctid)
                     search['count'] += 1
                     self.update(mid, search)
-                    search['new'] = True
             else:
                 search['count'] = 1
                 search['userlist'] = [acctid,]
                 self.insert(search)
-                search['new'] = True
 
             if search.get('_id', 0):
                del search['_id'] 

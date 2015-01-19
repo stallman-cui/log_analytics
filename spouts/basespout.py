@@ -14,6 +14,7 @@ class BaseSpout(Spout):
         self.open()
         self.model = model()
         self.conf = self.model.get_conf()
+        self.count = 0
 
     def open(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is initialized '''
@@ -43,12 +44,14 @@ class BaseSpout(Spout):
                 'state' : self.conf['state']
             }
             BaseSpout.message_id += 1
+            self.count += 1
             self.socket.send_json(message_tuple)
             ack_no = self.socket.recv_string()
             if ack_no == str(message_tuple['id']):
                 self.ack(ack_no)
             else:
                 self.fail(ack_no)
+        self.logger.info('%-10s ...... records count %d', self.count)
         self.logger.info('%-10s End the read ...', self.model.__module__)
 
     def ack(self, msg_id):

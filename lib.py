@@ -61,7 +61,7 @@ def log_config():
     logger = logging.getLogger('online_analytics')
     logger.setLevel(logging.DEBUG)
     
-    fh = logging.FileHandler('online.log')
+    fh = logging.FileHandler('/home/cui/log_analytics/online.log')
     fh.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler()

@@ -50,7 +50,6 @@ class PayorderUserModel(MongoModel):
 
             self.upsert(fix_data)
 
-            fix_data['new'] = True
             fix_data['type'] = 'payorderuser'
 
             if fix_data.get('_id', 0):

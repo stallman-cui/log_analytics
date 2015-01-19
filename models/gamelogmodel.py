@@ -18,9 +18,9 @@ class GamelogModel(MongoModel):
 
     def get_data(self):
         logger = logging.getLogger('online_analytics')
-        #gamelog = 'gamelog.txt'
+        gamelog = '/home/cui/log_analytics/gamelog.txt'
         #gamelog = 'gamelog_20150108.txt'
-        gamelog = '/home/cui/log_analytics/gamelog_2015-60.txt'
+        #gamelog = '/home/cui/log_analytics/gamelog_2015-60.txt'
         result = []
         try:
             with open(gamelog, 'r') as f:
