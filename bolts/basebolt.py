@@ -42,7 +42,7 @@ class BaseBolt(Bolt):
             #topic = input[0:4]
             recv_tuple = input[4:]
             recv_tuple = json.loads(recv_tuple)
-            #self.logger.debug('%-20s execute: %d ', self.model.__module__, self.num)
+            #self.logger.debug('%-20s execute: %s ', self.model.__module__, self.num)
             self.num += 1
             
             body = self.model.handle(recv_tuple['body'])

@@ -24,6 +24,8 @@ class TestGamelogModel(unittest.TestCase):
     def test_read_gamelog_not_empty(self):
         gamelog = GamelogModel().get_data()
         #print('gamelog: output %d results' % len(gamelog))
+        for i in gamelog:
+            self.assertEqual(len(i), 4)
         self.failIf(not gamelog, 'gamelog data is empty')
 
 class TestMongoModel(unittest.TestCase):
@@ -33,7 +35,7 @@ class TestMongoModel(unittest.TestCase):
     def tearDown(self):
         del self.model
 
-    def test_connect_mongodb(self):
+    def test_connect_to_mongodb(self):
         result = self.model.get_list().count()
         #print('login record count:', result)
         self.failIf(not result, 'mongodb service is error')
@@ -128,8 +130,12 @@ class TestPayorderUserModel(unittest.TestCase):
 
 class TestTransfer(unittest.TestCase):
     def setUp(self):
+        cmd = '%s/transfer.py %s' % (basedir, 'start')
+        rv = os.system(cmd)
+        self.assertEqual(rv, 0)
         self.pidfile = os.path.join(basedir, 'log.pid')
         self.logfile = os.path.join(basedir, 'online.log')
+        time.sleep(6)
     
     def tearDown(self):
         cmd = '%s/transfer.py %s' % (basedir, 'stop')
@@ -140,23 +146,35 @@ class TestTransfer(unittest.TestCase):
         except OSError as e:
             print(str(e))
         
-    def test_transfer_log_file_is_error(self):
-        cmd = '%s/transfer.py %s' % (basedir, 'start')
-        #print(cmd)
-        rv = os.system(cmd)
-        self.assertEqual(rv, 0)
-        time.sleep(5)
-        
-        log = file(self.logfile).read()
+    def test_transfer_data_count(self):
         print('\n')
-        print(log)
-        gamelog_match = re.findall(r'\w*gamelogmodel\w*', log)
-        payment_match = re.findall(r'\w*paymentmodel\w*', log)
+        log = file(self.logfile).read().lower()
+        #print(log)
+        gamelog_match = re.findall(r'\w*gamelogmodel\sread\w*', log)
+        payment_match = re.findall(r'\w*paymentmodel\sread\w*', log)
         match = [gamelog_match, payment_match]
         for each_match in match:
             self.assertEqual(len(each_match), 2)
-            
         
-    
+        all_spout_count = {}
+        for i in ['gamelog', 'payment']:
+            pattern = '\w*' + i + 'model\srecords\scount\s\d*'
+            match = re.search(pattern, log)
+            count = match.group(0).split()[3]
+            all_spout_count[i] = int(count)
+        print('all_spout_count: ', all_spout_count)
+        
+        all_bolt_count = {}
+        for i in ['login', 'signup', 'createrole', 'payorderuser', 'server']:
+            pattern = '\w*' + i + 'model\s* processed\w*'
+            count = len(re.findall(pattern, log))
+            all_bolt_count[i] = count
+
+        print('all_bolt_count: ', all_bolt_count)
+        self.assertEqual(all_spout_count['gamelog']+all_spout_count['payment'],
+                         all_bolt_count['login'] + all_bolt_count['signup'] + 
+                         all_bolt_count['createrole'] + all_bolt_count['payorderuser'])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,12 @@ import json
 import time
 import logging
 
+opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount', 
+          'logout_logcount',
+          'yuanbao_logchange', 'shop_subyuanbao', 
+          'fuben_logchange', 'trunk_task_accept', 'trunk_task_finish', 
+]
+
 def gamelog_parse(line):
     FORMAT = '%Y-%m-%d %H:%M:%S'
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
@@ -24,11 +30,7 @@ def gamelog_parse(line):
             return gamelog
 
 def gamelog_filter(gamelog_tuple):
-    opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount', 
-              'logout_logcount',
-              'yuanbao_logchange', 'shop_subyuanbao', 
-              'fuben_logchange', 'trunk_task_accept', 'trunk_task_finish', 
-             ]
+    global opnode 
     if not gamelog_tuple['op']['code'] in opnode:
         return
     return gamelog_tuple

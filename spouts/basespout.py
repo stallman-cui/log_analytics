@@ -35,15 +35,16 @@ class BaseSpout(Spout):
         ''' When this method is called, the spout emit 
         tuples to the output collector. 
         '''
-        self.logger.info('%-10s Starting read ... ', self.model.__module__)
+        self.logger.info('%-10s read Starting  ... ', self.model.__module__)
         all_data = self.model.get_data()
         for line in all_data:
+            BaseSpout.message_id += 1
             message_tuple = {
                 'id' : BaseSpout.message_id % BaseSpout.MAX,
                 'body' : line,
                 'state' : self.conf['state']
             }
-            BaseSpout.message_id += 1
+            #self.logger.debug('%-10s data %s', self.model.__module__, message_tuple)
             self.count += 1
             self.socket.send_json(message_tuple)
             ack_no = self.socket.recv_string()
@@ -51,12 +52,11 @@ class BaseSpout(Spout):
                 self.ack(ack_no)
             else:
                 self.fail(ack_no)
-        self.logger.info('%-10s ...... records count %d', self.count)
-        self.logger.info('%-10s End the read ...', self.model.__module__)
+        self.logger.info('%-10s records count %d, %d', self.model.__module__, self.count, BaseSpout.message_id)
+        self.logger.info('%-10s read End   ...', self.model.__module__)
 
     def ack(self, msg_id):
         ''' The tuple emiited by this spout with the msg_id has been fully processed. '''
-        #print("Gamelog: request was Sucessed, messsage_id: %d \n" % int(msg_id))
 
     def fail(self, msg_id):
         ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
