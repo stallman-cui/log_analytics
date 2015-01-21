@@ -5,6 +5,11 @@ from gevent.queue import Queue
 import json
 import sys
 import logging
+import os
+import time
+
+basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+sys.path.insert(0, basedir)
 
 from configs.config import PUBTITLE
 from spouts.basespout import BaseSpout
@@ -18,6 +23,7 @@ from models.loginmodel import LoginModel
 from models.createrolemodel import CreateroleModel
 from models.payorderusermodel import PayorderUserModel
 from models.servermodel import ServerModel
+from worker import Worker
 
 class Transfer(Daemon):
     def __init__(self, pidfile):
@@ -25,6 +31,7 @@ class Transfer(Daemon):
         self.context = zmq.Context()
         self.messages = Queue()
         self.logger = logging.getLogger('online_analytics')
+        self.pidfile = pidfile
 
     # Publish all the messages
     def sender(self):
@@ -56,6 +63,13 @@ class Transfer(Daemon):
                 server_socket.send(str(message_tuple['id']))
             else:
                 server_socket.send_string('Error')
+    
+    def update_status(self):
+        pid = int(file(self.pidfile).read().strip())
+        worker = Worker()
+        while True:
+            worker.update(pid, int(time.time()))
+            gevent.sleep(1)
 
     # generate a data process
     def make_bolt(self, model):
@@ -74,6 +88,7 @@ class Transfer(Daemon):
         coroutines = []
         coroutines.append(gevent.spawn(self.receiver))
         coroutines.append(gevent.spawn(self.sender))
+        coroutines.append(gevent.spawn(self.update_status))
 
         all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
                            PayorderUserModel, ServerModel,
@@ -90,6 +105,8 @@ class Transfer(Daemon):
 
     def run(self):
         self.init_coroutines()
+
+        
 
 if __name__ == "__main__":
     online_analytics = Transfer('/home/cui/log_analytics/log.pid')

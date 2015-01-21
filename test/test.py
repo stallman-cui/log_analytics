@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 import os
-import sys
 import unittest
 import time
 import re
-
-basedir, testdir = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
-sys.path.append("%s" % basedir)
 
 from models.gamelogmodel import GamelogModel
 from models.paymentmodel import PaymentModel

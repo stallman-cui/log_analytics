@@ -1,6 +1,9 @@
 import sys, os, time, atexit
 from signal import SIGTERM
 
+from worker import Worker
+from topology import Topology
+
 class Daemon(object):
     """
     A generic daemon class.
@@ -11,6 +14,8 @@ class Daemon(object):
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+        self.topology = Topology()
+        self.worker = Worker()
 
     def daemonize(self):
         '''
@@ -70,6 +75,8 @@ class Daemon(object):
             sys.exit(1)
         
         self.daemonize()
+        self.topology.create_topology('online')
+        self.worker.register(int(file(self.pidfile, 'r').read().strip()))
         self.run()
 
     def stop(self):
@@ -84,6 +91,7 @@ class Daemon(object):
             message = 'pidfile %s does not exist. Daemon not running?\n'
             sys.stderr.write(message % self.pidfile)
             return
+        self.worker.unregister(pid)
         try:
             while True:
                 os.kill(pid, SIGTERM)

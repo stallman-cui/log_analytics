@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-topology_file = 'topology.etc'
+topology_file = '/home/cui/log_analytics/configs/topology.etc'
 
 PUBTITLE = {
     'login_logcount' : '1001',
