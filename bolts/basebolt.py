@@ -2,7 +2,7 @@ import zmq.green as zmq
 import json
 import logging
 
-from configs.config import PUBTITLE
+from configs.config import PUBTITLE, END_TOPO_SUCCESS
 from bolts.bolt import Bolt
 
 class BaseBolt(Bolt):
@@ -48,7 +48,7 @@ class BaseBolt(Bolt):
             body = self.model.handle(recv_tuple['body'])
             #self.logger.debug('%-10s recv_body: %s: ', self.model.__module__, body)
             if body:
-                if 'end' == body:
+                if END_TOPO_SUCCESS == body:
                     self.logger.debug('%-25s processed messsage id: %d',
                                       self.model.__module__, 
                                       int(recv_tuple['id']))

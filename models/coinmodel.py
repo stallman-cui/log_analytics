@@ -1,6 +1,7 @@
 from coinhourmodel import CoinHourModel
 from coindaymodel import CoinDayModel
 from cointypemodel import CoinTypeModel
+from configs.config import END_TOPO_SUCCESS
 
 class CoinModel():
     def __init__(self):
@@ -23,4 +24,4 @@ class CoinModel():
                 if hour_result:
                     day_result = self.day_model.handle(hour_result)
                     if day_result:
-                        return 'end'
+                        return END_TOPO_SUCCESS

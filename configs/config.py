@@ -20,6 +20,7 @@ PUBTITLE = {
     'coin' : '2010',
 }
 
+END_TOPO_SUCCESS = 'end'
 
 DB_CONN = {
     'mongo_db' : {

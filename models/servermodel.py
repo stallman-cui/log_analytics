@@ -1,4 +1,5 @@
 from common.mongo import MongoModel
+from configs.config import END_TOPO_SUCCESS
 
 class ServerModel(MongoModel):
     def get_db(self):
@@ -47,6 +48,6 @@ class ServerModel(MongoModel):
             else:
                 self.insert(search)
 
-            if search.get('_id', 0):
-               del search['_id'] 
-            return search
+            #if search.get('_id', 0):
+            #   del search['_id'] 
+            return END_TOPO_SUCCESS
