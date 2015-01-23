@@ -46,12 +46,20 @@ class BaseBolt(Bolt):
             self.num += 1
             
             body = self.model.handle(recv_tuple['body'])
-            #self.logger.debug('recv_body: %s: ', recv_tuple['body'])
-            recv_tuple['body'] = body
-            recv_tuple['state'] = self.conf['state']
-            self.send_socket.send_json(recv_tuple)
-            ack_result = self.send_socket.recv()
-            self.logger.debug('%-25s processed messsage id:  %d', self.model.__module__, int(ack_result))
+            #self.logger.debug('%-10s recv_body: %s: ', self.model.__module__, body)
+            if body:
+                if 'end' == body:
+                    self.logger.debug('%-25s processed messsage id: %d',
+                                      self.model.__module__, 
+                                      int(recv_tuple['id']))
+                else:
+                    recv_tuple['body'] = body
+                    recv_tuple['state'] = self.conf['state']
+                    self.send_socket.send_json(recv_tuple)
+                    ack_result = self.send_socket.recv()
+                    self.logger.debug('%-25s processed messsage id: %d',
+                                      self.model.__module__, 
+                                      int(ack_result))
 
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''

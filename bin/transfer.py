@@ -23,11 +23,13 @@ from models.loginmodel import LoginModel
 from models.createrolemodel import CreateroleModel
 from models.payorderusermodel import PayorderUserModel
 from models.servermodel import ServerModel
+from models.coinmodel import CoinModel
 from worker import Worker
 
-class Transfer(Daemon):
+####class Transfer(Daemon):
+class Transfer():
     def __init__(self, pidfile):
-        Daemon.__init__(self, pidfile)
+        ####Daemon.__init__(self, pidfile)
         self.context = zmq.Context()
         self.messages = Queue()
         self.logger = logging.getLogger('online_analytics')
@@ -92,6 +94,7 @@ class Transfer(Daemon):
 
         all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
                            PayorderUserModel, ServerModel,
+                           CoinModel,
         ]
         all_spout_models = [GamelogModel, PaymentModel,]
 
@@ -106,10 +109,9 @@ class Transfer(Daemon):
     def run(self):
         self.init_coroutines()
 
-        
-
 if __name__ == "__main__":
     online_analytics = Transfer('/home/cui/log_analytics/log.pid')
+    online_analytics.run()
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             online_analytics.start()
@@ -120,6 +122,6 @@ if __name__ == "__main__":
         else:
             print('Unknown command')
             sys.exit(2)
-    else:
-        print('Usage: %s start|stop|restart' % sys.argv[0])
-        sys.exit(2)
+    #else:
+    #    print('Usage: %s start|stop|restart' % sys.argv[0])
+    #    sys.exit(2)

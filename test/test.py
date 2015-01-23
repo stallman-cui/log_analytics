@@ -3,9 +3,16 @@ import os
 import unittest
 import time
 import re
+import sys
+
+basedir, testdir = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+sys.path.append(basedir)
 
 from models.gamelogmodel import GamelogModel
 from models.paymentmodel import PaymentModel
+from models.signuphourmodel import SignupHourModel
+from models.loginhourmodel import LoginHourModel
+#from models.createrolehourmodel import CreateroleHourModel
 from models.loginmodel import LoginModel
 from models.signupmodel import SignupModel
 from models.payorderusermodel import PayorderUserModel
@@ -36,9 +43,9 @@ class TestMongoModel(unittest.TestCase):
         #print('login record count:', result)
         self.failIf(not result, 'mongodb service is error')
 
-class TestLoginModel(unittest.TestCase):
+class TestLoginHourModel(unittest.TestCase):
     def setUp(self):
-        self.model = LoginModel()
+        self.model = LoginHourModel()
         self.source_data = {
             'area' : '5343a423dbdb67b036b3ee00',
             'data' : {
@@ -59,16 +66,16 @@ class TestLoginModel(unittest.TestCase):
     def tearDown(self):
         del self.source_data
 
-    def test_login_hanle_data(self):
+    def test_login_hour_hanle_data(self):
         result = self.model.handle(self.source_data)
         self.assert_(result)
         userlist = result['userlist']
         self.assertIn(self.source_data['data']['acct'], userlist)
         self.assertEqual(result['type'], 'login')
 
-class TestSignupModel(unittest.TestCase):
+class TestSignupHourModel(unittest.TestCase):
     def setUp(self):
-        self.model = SignupModel()
+        self.model = SignupHourModel()
         self.source_data = {
             'area' : '5343a423dbdb67b036b3ee00',
             'data' : {
@@ -89,7 +96,7 @@ class TestSignupModel(unittest.TestCase):
     def tearDown(self):
         del self.source_data
 
-    def test_signup_hanle_data(self):
+    def test_signup_hour_hanle_data(self):
         result = self.model.handle(self.source_data)
         self.assert_(result)
         self.assertEqual(result['ts'], 1420646400)
@@ -126,7 +133,7 @@ class TestPayorderUserModel(unittest.TestCase):
 
 class TestTransfer(unittest.TestCase):
     def setUp(self):
-        cmd = '%s/transfer.py %s' % (basedir, 'start')
+        cmd = '%s/bin/transfer.py %s' % (basedir, 'start')
         rv = os.system(cmd)
         self.assertEqual(rv, 0)
         self.pidfile = os.path.join(basedir, 'log.pid')
@@ -134,7 +141,7 @@ class TestTransfer(unittest.TestCase):
         time.sleep(6)
     
     def tearDown(self):
-        cmd = '%s/transfer.py %s' % (basedir, 'stop')
+        cmd = '%s/bin/transfer.py %s' % (basedir, 'stop')
         rv = os.system(cmd)
         self.assertEqual(rv, 0)
         try:

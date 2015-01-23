@@ -1,12 +1,10 @@
-from common.mongo import MongoModel
-from lib import get_ts
+from models.createroledaymodel import CreateroleDayModel
+from models.createrolehourmodel import CreateroleHourModel
 
-class CreateroleModel(MongoModel):
-    def get_db(self):
-        return 'analytics'
-
-    def get_collection(self):
-        return 'user_create_role'
+class CreateroleModel():
+    def __init__(self):
+        self.hour_model = CreateroleHourModel()
+        self.day_model = CreateroleDayModel()
 
     def get_conf(self):
         conf = {
@@ -15,39 +13,11 @@ class CreateroleModel(MongoModel):
         }
         return conf
 
-    def get_keys(self):
-        return 'area','plat','ts'
-
     def handle(self, recv_body):
         if recv_body:
-            try:
-                area = recv_body['area']
-                plat = str(recv_body['data']['corpid'])
-                acctid = str(recv_body['data']['acct'])
-                ts = recv_body['ts']
-            except KeyError:
-                return
-            search = {
-                'area' : area,
-                'plat' : str(plat),
-                'ts' : get_ts(ts, interval = 'day')
-            }
-            __id = self.get_one(search)
-            if __id:
-                userlist = __id['userlist']
-                mid = str(__id['_id'])
-                search['count'] = __id['count']
-                if acctid not in userlist:
-                    search['userlist'] = userlist
-                    search['userlist'].append(acctid)
-                    search['count'] += 1
-                    self.update(mid, search)
-            else:
-                search['count'] = 1
-                search['userlist'] = [acctid,]
-                self.insert(search)
+            hour_result = self.hour_model.handle(recv_body)
+            if hour_result:
+                self.day_model.handle(hour_result)
+                day_result = self.day_model.handle(hour_result)
+                return day_result
 
-            if search.get('_id', 0):
-               del search['_id'] 
-            search['type'] = 'createrole'
-            return search
