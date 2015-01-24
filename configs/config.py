@@ -24,6 +24,7 @@ PUBTITLE = {
     #'coin' : '2008',
     #'userlogininfo' : '2009',
     #'mainline' : '2010',
+    'payretentiontrace' : '2011',
 }
 
 END_TOPO_SUCCESS = 200

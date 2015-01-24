@@ -17,6 +17,5 @@ class SignupModel():
         if recv_body:
             hour_result = self.hour_model.handle(recv_body)
             if hour_result:
-                self.day_model.handle(hour_result)
                 day_result = self.day_model.handle(hour_result)
                 return day_result

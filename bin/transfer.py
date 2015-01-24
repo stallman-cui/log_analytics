@@ -27,6 +27,7 @@ from models.coinmodel import CoinModel
 from models.payorderdetailmodel import PayorderDetailModel
 from models.userlogininfomodel import UserLoginInfoModel
 from models.mainlinemodel import MainlineModel
+from models.payretentiontracemodel import PayRetentionTraceModel
 from worker import Worker
 
 ####class Transfer(Daemon):
@@ -98,9 +99,10 @@ class Transfer():
         all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
                            PaySummaryModel, ServerModel,
                            PayorderDetailModel, UserLoginInfoModel,
-                           CoinModel, MainlineModel,
+                           CoinModel, MainlineModel, 
+                           PayRetentionTraceModel,
         ]
-        all_spout_models = [GamelogModel, ]#PaymentModel,]
+        all_spout_models = [GamelogModel, PaymentModel,]
 
         for each_model in all_bolt_models:
             coroutines.append(gevent.spawn(self.make_bolt, each_model))

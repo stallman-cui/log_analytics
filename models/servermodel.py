@@ -37,7 +37,7 @@ class ServerModel(MongoModel):
                 search['reg'] = count
             elif log_type == 'createrole':
                 search['create_role'] = count
-            elif log_type == 'payorderuser':
+            elif log_type == 'paysummary':
                 search['pay_user'] = count
                 search['pay_count'] = recv_body['pay_count']
                 search['pay_amout'] = recv_body['pay_amout']

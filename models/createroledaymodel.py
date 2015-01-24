@@ -8,13 +8,6 @@ class CreateroleDayModel(MongoModel):
     def get_collection(self):
         return 'user_create_role'
 
-    def get_conf(self):
-        conf = {
-            'sub_conf' : ['createrole_hour'],
-            'state' : 'createrole'
-        }
-        return conf
-
     def get_keys(self):
         return 'area','plat','ts'
 
@@ -40,6 +33,8 @@ class CreateroleDayModel(MongoModel):
                     search['userlist'].append(acctid)
                     search['count'] += 1
                     self.update(mid, search)
+                else:
+                    return
             else:
                 search['count'] = 1
                 search['userlist'] = [acctid,]

@@ -8,13 +8,6 @@ class LoginDayModel(MongoModel):
     def get_collection(self):
         return 'user_login'
 
-    def get_conf(self):
-        conf = {
-            'sub_conf' : ['login_hour'],
-            'state' : 'login'
-        }
-        return conf
-
     def get_keys(self):
         return 'area','plat','ts'
 
@@ -35,11 +28,13 @@ class LoginDayModel(MongoModel):
                 userlist = __id['userlist']
                 mid = str(__id['_id'])
                 search['count'] = __id['count']
-                search['userlist'] = userlist
                 if acctid not in userlist:
+                    search['userlist'] = userlist
                     search['userlist'].append(acctid)
                     search['count'] += 1
                     self.update(mid, search)
+                else:
+                    return
             else:
                 search['count'] = 1
                 search['userlist'] = [acctid,]

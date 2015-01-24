@@ -50,7 +50,7 @@ class PaySummaryModel(MongoModel):
 
             self.upsert(fix_data)
 
-            fix_data['type'] = 'payorderuser'
+            fix_data['type'] = 'paysummary'
 
             if fix_data.get('_id', 0):
                del fix_data['_id'] 

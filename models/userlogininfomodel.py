@@ -79,7 +79,7 @@ class UserLoginInfoModel(MongoModel):
             #4.when type == signout: if login_ts is not empty and 
             #  logout_ts is empty, so update the logout_ts
             if log_type == 'signout' and \
-               (result.get('login_ts', 0) and (not result.get('logout_ts', 0)) and (ts > result['logout_ts'])):
+               (result.get('login_ts', 0) and (not result.get('logout_ts', 0)) and (ts > result['login_ts'])):
                 search['logout_ts'] = ts
                 search['ts'] = int(time.time())
                 self.update(mid, search)

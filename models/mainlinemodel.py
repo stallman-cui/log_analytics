@@ -72,9 +72,13 @@ class MainlineModel(MongoModel):
 
             if opcode == 'trunk_task_accept':
                 if tod_accept:
+                    # it is not first time
                     search['acceptuserlist'] = tod_accept
                     if acctid not in tod_accept:
                         search['acceptuserlist'].append(acctid)
+                    else:
+                        return
+                # first time this area, plat, acctid
                 elif yes_accept:
                     search['acceptuserlist'] = yes_accept
                     if acctid not in yes_accept:
@@ -88,6 +92,8 @@ class MainlineModel(MongoModel):
                     search['finishuserlist'] = tod_finish
                     if acctid not in tod_finish:
                         search['finishuserlist'].append(acctid)
+                    else:
+                        return
                 elif yes_finish:
                     search['finishuserlist'] = yes_finish
                     if acctid not in yes_finish:
