@@ -96,7 +96,10 @@ class PaymentModel:
         #print(search)
         data = self.get_user_payment_list(search)
         if data['status'] != 500:
-            pmresult = json.loads(data['body'])
+            try:
+                pmresult = json.loads(data['body'])
+            except ValueError:
+                return
 
             user_pay_list = {}
             game_info = {}

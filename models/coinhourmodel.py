@@ -31,7 +31,7 @@ class CoinHourModel(MongoModel):
             else:
                 self.insert(search)
 
-            if search.get('_id', 0):
-               del search['_id'] 
-            search['coin'] = coin
-            return search                
+            #if search.get('_id', 0):
+            #   del search['_id'] 
+            #search['coin'] = coin
+            #return search                

@@ -10,7 +10,7 @@ class ServerModel(MongoModel):
     
     def get_conf(self):
         conf = {
-            'sub_conf' : ['login', 'signup', 'createrole', 'payorderuser',],
+            'sub_conf' : ['login', 'signup', 'createrole', 'paysummary',],
             'state' : 'server'
         }
         return conf

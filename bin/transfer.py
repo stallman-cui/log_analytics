@@ -21,9 +21,12 @@ from models.paymentmodel import PaymentModel
 from models.signupmodel import SignupModel
 from models.loginmodel import LoginModel
 from models.createrolemodel import CreateroleModel
-from models.payorderusermodel import PayorderUserModel
+from models.paysummarymodel import PaySummaryModel
 from models.servermodel import ServerModel
 from models.coinmodel import CoinModel
+from models.payorderdetailmodel import PayorderDetailModel
+from models.userlogininfomodel import UserLoginInfoModel
+from models.mainlinemodel import MainlineModel
 from worker import Worker
 
 ####class Transfer(Daemon):
@@ -51,7 +54,7 @@ class Transfer():
                     topic = PUBTITLE[message_tuple['state']]
                 send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
             #else:
-            #    self.logger.debug('messages queue is empty, may be all the request id done')
+            #    self.logger.info('messages queue is empty, may be all the request is done or not start')
             gevent.sleep(0.01)
 
     # Collect all the messages        
@@ -93,14 +96,15 @@ class Transfer():
         coroutines.append(gevent.spawn(self.update_status))
 
         all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
-                           PayorderUserModel, ServerModel,
-                           CoinModel,
+                           PaySummaryModel, ServerModel,
+                           PayorderDetailModel, UserLoginInfoModel,
+                           CoinModel, MainlineModel,
         ]
-        all_spout_models = [GamelogModel, PaymentModel,]
+        all_spout_models = [GamelogModel, ]#PaymentModel,]
 
         for each_model in all_bolt_models:
             coroutines.append(gevent.spawn(self.make_bolt, each_model))
-
+        
         for each_model in all_spout_models:
             coroutines.append(gevent.spawn(self.make_spout, each_model))
 

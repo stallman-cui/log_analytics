@@ -1,6 +1,6 @@
 from common.mongo import MongoModel
 
-class PayorderUserModel(MongoModel):
+class PaySummaryModel(MongoModel):
     def get_db(self):
         return 'analytics'
 
@@ -10,7 +10,7 @@ class PayorderUserModel(MongoModel):
     def get_conf(self):
         conf = {
             'sub_conf' : ['payment'],
-            'state' : 'payorderuser'
+            'state' : 'paysummary'
         }
         return conf
 
@@ -55,4 +55,3 @@ class PayorderUserModel(MongoModel):
             if fix_data.get('_id', 0):
                del fix_data['_id'] 
             return fix_data
-

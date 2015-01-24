@@ -42,24 +42,31 @@ class BaseBolt(Bolt):
             #topic = input[0:4]
             recv_tuple = input[4:]
             recv_tuple = json.loads(recv_tuple)
-            #self.logger.debug('%-20s execute: %s ', self.model.__module__, self.num)
             self.num += 1
+            BaseBolt.num += 1
+            if BaseBolt.num % 1000 == 0:
+                self.logger.info('%-30s execute message id: %d', self.model.__module__, recv_tuple['id'])
             
             body = self.model.handle(recv_tuple['body'])
-            #self.logger.debug('%-10s recv_body: %s: ', self.model.__module__, body)
+            #self.logger.debug('%-30s recv_body: %s: ', self.model.__module__, body)
             if body:
                 if END_TOPO_SUCCESS == body:
-                    self.logger.debug('%-25s processed messsage id: %d',
-                                      self.model.__module__, 
-                                      int(recv_tuple['id']))
+                    #self.logger.debug('%-30s done messsage id: %d',
+                    #                  self.model.__module__, 
+                    #                  int(recv_tuple['id']))
+                    pass
                 else:
                     recv_tuple['body'] = body
                     recv_tuple['state'] = self.conf['state']
                     self.send_socket.send_json(recv_tuple)
                     ack_result = self.send_socket.recv()
-                    self.logger.debug('%-25s processed messsage id: %d',
-                                      self.model.__module__, 
-                                      int(ack_result))
-
+                    #self.logger.debug('%-30s processed messsage id: %d',
+                    #                  self.model.__module__, 
+                    #                  int(ack_result))
+            #else:
+            #    self.logger.debug('%-30s drop messsage id: %d', 
+            #                      self.model.__module__, 
+            #                      int(recv_tuple['id']))
+                
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''

@@ -37,6 +37,9 @@ class BaseSpout(Spout):
         '''
         self.logger.info('%-10s read Starting  ... ', self.model.__module__)
         all_data = self.model.get_data()
+        if not all_data:
+            self.logger.info('%-10s read ERROR  ... ', self.model.__module__)
+            return
         for line in all_data:
             BaseSpout.message_id += 1
             message_tuple = {

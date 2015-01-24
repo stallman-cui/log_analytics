@@ -23,14 +23,15 @@ class CoinTypeModel(MongoModel):
                 coin_type = recv_body['data']['extra']['consumetype']
                 ts = recv_body['ts']
                 amount = abs(recv_body['data']['amount'])
-                old = str(recv_body['data']['extra']['old_yuanbao'])
+                new = str(recv_body['data']['extra']['new_yuanbao'])
                 uid = str(recv_body['data']['Uid'])
             except KeyError as e:
                 print 'Key error: ', str(e)
+                print recv_body
                 return
                 
             plat = str(plat_arr[len(plat_arr) -2])
-            record_key = '_'.join([uid, str(ts), old])
+            record_key = '_'.join([uid, str(ts), new])
 
             search = {
                 'area' : area,

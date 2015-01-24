@@ -20,8 +20,7 @@ class CoinModel():
         if recv_body:
             type_result = self.type_model.handle(recv_body)
             if type_result:
-                hour_result = self.hour_model.handle(type_result)
-                if hour_result:
-                    day_result = self.day_model.handle(hour_result)
-                    if day_result:
-                        return END_TOPO_SUCCESS
+                self.hour_model.handle(type_result)
+                self.day_model.handle(type_result)
+
+                return END_TOPO_SUCCESS
