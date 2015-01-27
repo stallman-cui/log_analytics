@@ -12,7 +12,7 @@ class MainlineModel(MongoModel):
     def get_keys(self):
         return 'area','plat', 'ts', 'taskid'
 
-    def get_conf(self):
+    def get_conf(self): 
         conf = {
             'sub_conf' : ['trunk_task_accept', 'trunk_task_finish'],
             'state' : 'mainline'

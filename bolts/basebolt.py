@@ -54,7 +54,6 @@ class BaseBolt(Bolt):
                     self.logger.debug('%-30s done messsage id: %d',
                                       self.model.__module__, 
                                       int(recv_tuple['id']))
-
                 else:
                     recv_tuple['body'] = body
                     recv_tuple['state'] = self.conf['state']
@@ -63,10 +62,10 @@ class BaseBolt(Bolt):
                     self.logger.debug('%-30s processed messsage id: %d',
                                       self.model.__module__, 
                                       int(ack_result))
-            #else:
-                #self.logger.debug('%-30s drop messsage id: %d', 
-                #                  self.model.__module__, 
-                #                  int(recv_tuple['id']))
+            else:
+                self.logger.debug('%-30s drop messsage id: %d', 
+                                  self.model.__module__, 
+                                  int(recv_tuple['id']))
                 
     def cleanup(self):
         ''' Called when an IBolt is going to be shutdown. '''

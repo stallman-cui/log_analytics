@@ -16,19 +16,18 @@ from lib import get_period_ts
 class PaymentModel:
     def __init__(self):
         self.__ch = pycurl.Curl()
-        self.buf = cStringIO.StringIO()
-        self.__ch.setopt(pycurl.WRITEFUNCTION, self.buf.write)
         self.__ch.setopt(pycurl.CONNECTTIMEOUT, 5)
         self.__ch.setopt(pycurl.FOLLOWLOCATION, True)
         self.__secret = db_config['ghoko']['secret']
 
     def call(self, url, query = {}, param = {}):
+        buf = cStringIO.StringIO()
+        self.__ch.setopt(pycurl.WRITEFUNCTION, buf.write)
         #print 'param: ', json.dumps(param, indent=3)
         host = 'https://pay.millionhero.com'
         ts = str(int(time.time()))
         sign = hashlib.md5(url + ts + self.__secret ).hexdigest()
         url = '{0}{1}?ts={2}&sign={3}&{4}'.format(host, url, ts, sign, urllib.urlencode(query))
-
         self.__ch.setopt(pycurl.URL, url)
         self.__ch.setopt(pycurl.USERAGENT, 'MH Client')
         self.__ch.setopt(pycurl.SSL_VERIFYHOST, False)
@@ -41,7 +40,7 @@ class PaymentModel:
             self.__ch.perform()
             result = {
                 'status' : self.__ch.getinfo(pycurl.HTTP_CODE),
-                'body' : self.buf.getvalue()
+                'body' : buf.getvalue()
             }
         except pycurl.error as e:
             errno, errstr = e
@@ -94,11 +93,14 @@ class PaymentModel:
             'page.index' : -1
         }
         #print(search)
+        data = ''
         data = self.get_user_payment_list(search)
         if data['status'] != 500:
             try:
                 pmresult = json.loads(data['body'])
-            except ValueError:
+            except ValueError as e:
+                print('ValueError: ', str(e))
+                #print(data)
                 return
 
             user_pay_list = {}

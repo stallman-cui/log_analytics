@@ -8,6 +8,13 @@ class CreateroleDayModel(MongoModel):
     def get_collection(self):
         return 'user_create_role'
 
+    def get_conf(self):
+        conf = {
+            'sub_conf' : ['createrole_hour'],
+            'state' : 'createrole'
+        }
+        return conf
+
     def get_keys(self):
         return 'area','plat','ts'
 

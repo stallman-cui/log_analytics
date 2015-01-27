@@ -7,6 +7,13 @@ class CoinHourModel(MongoModel):
     def get_collection(self):
         return 'coin_hour'
 
+    def get_conf(self):
+        conf = {
+            'sub_conf' : ['cointype'],
+            'state' : 'coinhour'
+        }
+        return conf
+
     def get_keys(self):
         return 'area','plat','ts'
 

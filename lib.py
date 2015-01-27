@@ -66,14 +66,16 @@ def get_period_ts(time_str='', interval='hour'):
     return ts
     
 def log_config():
+    #level = logging.INFO
+    level = logging.DEBUG
     logger = logging.getLogger('online_analytics')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     
     fh = logging.FileHandler('/home/cui/log_analytics/online.log')
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(level)
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(level)
 
     formatter = logging.Formatter('[%(levelname)s]  - %(asctime)s -  %(message)s')
     fh.setFormatter(formatter)

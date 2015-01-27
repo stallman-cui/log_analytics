@@ -1,34 +1,24 @@
 #!/usr/bin/env python
-import gevent
-import zmq.green as zmq
-from gevent.queue import Queue
-import json
 import sys
+import json
 import logging
 import os
 import time
+import multiprocessing
+import gevent
+import zmq.green as zmq
+from gevent.queue import Queue
 
 basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 sys.path.insert(0, basedir)
 
-from configs.config import PUBTITLE
-from spouts.basespout import BaseSpout
-from bolts.basebolt import BaseBolt
-
 from models.daemon import Daemon
-from models.gamelogmodel import GamelogModel
-from models.paymentmodel import PaymentModel
-from models.signupmodel import SignupModel
-from models.loginmodel import LoginModel
-from models.createrolemodel import CreateroleModel
-from models.paysummarymodel import PaySummaryModel
-from models.servermodel import ServerModel
-from models.coinmodel import CoinModel
-from models.payorderdetailmodel import PayorderDetailModel
-from models.userlogininfomodel import UserLoginInfoModel
-from models.mainlinemodel import MainlineModel
-from models.payretentiontracemodel import PayRetentionTraceModel
 from worker import Worker
+from configs.config import PUBTITLE
+from bolts.basebolt import BaseBolt
+from spouts.basespout import BaseSpout
+from allmodel import all_bolt_models
+from allmodel import all_spout_models
 
 ####class Transfer(Daemon):
 class Transfer():
@@ -54,9 +44,10 @@ class Transfer():
                 else:
                     topic = PUBTITLE[message_tuple['state']]
                 send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
-            #else:
-            #    self.logger.info('messages queue is empty, may be all the request is done or not start')
-            gevent.sleep(0.01)
+            else:
+                gevent.sleep(1)
+                #self.logger.info('messages queue is empty, may be all the request is done or not start')
+            gevent.sleep(0)
 
     # Collect all the messages        
     def receiver(self):
@@ -82,38 +73,41 @@ class Transfer():
         bolt = BaseBolt(model)
         while True:
             bolt.execute()
-            gevent.sleep(0.1)
+            gevent.sleep(0)
 
     def make_spout(self, model):
         spout = BaseSpout(model)
         while True:
             spout.next_tuple()
-            gevent.sleep(3600)
+            gevent.sleep(60)
 
-    def init_coroutines(self):
+    def init_base(self):
+        thread = []
+        thread.append(gevent.spawn(self.receiver))
+        thread.append(gevent.spawn(self.sender))
+        thread.append(gevent.spawn(self.update_status))
+        gevent.joinall(thread)
+
+    def init_spout(self):
         coroutines = []
-        coroutines.append(gevent.spawn(self.receiver))
-        coroutines.append(gevent.spawn(self.sender))
-        coroutines.append(gevent.spawn(self.update_status))
-
-        all_bolt_models = [LoginModel, SignupModel, CreateroleModel, 
-                           PaySummaryModel, ServerModel,
-                           PayorderDetailModel, UserLoginInfoModel,
-                           CoinModel, MainlineModel, 
-                           PayRetentionTraceModel,
-        ]
-        all_spout_models = [GamelogModel, PaymentModel,]
-
-        for each_model in all_bolt_models:
-            coroutines.append(gevent.spawn(self.make_bolt, each_model))
-        
         for each_model in all_spout_models:
             coroutines.append(gevent.spawn(self.make_spout, each_model))
-
+        gevent.joinall(coroutines)
+        
+    def init_bolt(self):
+        coroutines = []
+        for each_model in all_bolt_models:
+            coroutines.append(gevent.spawn(self.make_bolt, each_model))
         gevent.joinall(coroutines)
 
     def run(self):
-        self.init_coroutines()
+        base_process = multiprocessing.Process(name='base_thread', target=self.init_base)
+        bolt_process = multiprocessing.Process(name='bolt', target=self.init_bolt)
+        spout_process = multiprocessing.Process(name='spout', target=self.init_spout)
+        
+        base_process.start()
+        bolt_process.start()
+        spout_process.start()
 
 if __name__ == "__main__":
     online_analytics = Transfer('/home/cui/log_analytics/log.pid')

@@ -8,6 +8,13 @@ class LoginDayModel(MongoModel):
     def get_collection(self):
         return 'user_login'
 
+    def get_conf(self):
+        conf = {
+            'sub_conf' : ['login_hour'],
+            'state' : 'login'
+        }
+        return conf
+
     def get_keys(self):
         return 'area','plat','ts'
 
@@ -42,5 +49,7 @@ class LoginDayModel(MongoModel):
 
             if search.get('_id', 0):
                del search['_id'] 
+            del search['userlist']
+            search['acctid'] = acctid
             search['type'] = 'login'
             return search

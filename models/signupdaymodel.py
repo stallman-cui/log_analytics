@@ -8,6 +8,13 @@ class SignupDayModel(MongoModel):
     def get_collection(self):
         return 'user_signup'
 
+    def get_conf(self):
+        conf = {
+            'sub_conf' : ['signup_hour'],
+            'state' : 'signup'
+        }
+        return conf
+
     def get_keys(self):
         return 'area','plat','ts'
 

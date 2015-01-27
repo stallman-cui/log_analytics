@@ -1,35 +1,32 @@
 from common.mongo import MongoModel
 from lib import get_ts
 
-class CoinTypeModel(MongoModel):
+class CoinFilterModel(MongoModel):
     def get_db(self):
         return 'analytics'
 
     def get_collection(self):
-        return 'coin_type'
+        return 'coin_user_list'
 
     def get_conf(self):
         conf = {
-            'sub_conf' : ['coinfilter'],
-            'state' : 'cointype'
+            'sub_conf' : ['yuanbao_logchange'],
+            'state' : 'coinfilter'
         }
         return conf
 
     def get_keys(self):
-        return 'area','plat','ts', 'type'
+        return 'area','plat','ts'
 
     def handle(self, recv_body):
         if recv_body:
             if not recv_body['data'].get('amount', 0) or \
                recv_body['data']['amount'] > 0:
                 return
-                
             try:
                 area = recv_body['area']
                 plat_arr = recv_body['data']['URS'].split('_')
-                coin_type = recv_body['data']['extra']['consumetype']
                 ts = recv_body['ts']
-                amount = abs(recv_body['data']['amount'])
                 new = str(recv_body['data']['extra']['new_yuanbao'])
                 uid = str(recv_body['data']['Uid'])
             except KeyError as e:
@@ -39,33 +36,22 @@ class CoinTypeModel(MongoModel):
                 
             plat = str(plat_arr[len(plat_arr) -2])
             record_key = '_'.join([uid, str(ts), new])
-
             search = {
                 'area' : area,
                 'plat' : plat,
                 'ts' : get_ts(ts, interval='day'),
-                'type' : coin_type
             }
-            __id = self.get_one(search)
-            search['coin'] = amount
-            if __id:
-                search['userlist'] = __id['userlist']
-                if record_key not in __id['userlist']:
+            result = self.get_one(search)
+            if result:
+                search['userlist'] = result['userlist']                
+                if record_key not in search['userlist']:
                     search['userlist'].append(record_key)
-                    search['coin'] += amount
-                    mid = str(__id['_id'])
+                    mid = str(result['_id'])
                     self.update(mid, search)
                 else:
                     return
             else:
-                search['userlist'] = [record_key,]
+                search['userlist'] = [record_key, ]
                 self.insert(search)
 
-            if search.get('_id', 0):
-               del search['_id'] 
-            del search['userlist']
-
-            search['ts'] = get_ts(ts, interval='hour')
-            search['coin'] = amount
-
-            return search
+            return recv_body
