@@ -43,7 +43,7 @@ class Analytics():
     def make_timer_bolt(self, model):
         bolt = TimerBolt(model)
         while True:
-            gevent.sleep(3600)
+            gevent.sleep(600)
             bolt.execute()
 
     def make_sync_bolt(self, model):
@@ -56,7 +56,7 @@ class Analytics():
         spout = model()
         while True:
             spout.next_tuple()
-            gevent.sleep()
+            gevent.sleep(3600)
 
     def init_base(self):
         thread = []

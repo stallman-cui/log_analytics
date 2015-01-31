@@ -128,7 +128,6 @@ class PaymentSpout(BaseSpout):
                     user_pay_list[game][area][plat][d['user']]['times'] += 1
                     user_pay_list[game][area][plat][d['user']]['amount'] += float(d['rmb'])
 
-
             for kgame, vgame in user_pay_list.items():
                 for karea, varea in vgame.items():
                     for kplat, vplat in varea.items():

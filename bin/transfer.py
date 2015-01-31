@@ -43,14 +43,13 @@ class Transfer():
         server_socket.bind("tcp://127.0.0.1:5000")
         while True:
             message_tuple = server_socket.recv_json()
-            if message_tuple:
+            if not message_tuple.get('id', 0):
                 Transfer.message_id += 1
-                message = {
+                message_tuple = {
                     'id' : Transfer.message_id % Transfer.MAX,
                     'body' : message_tuple['body'],
                     'state' : message_tuple['state']
                 }
-                self.messages.put_nowait(message)
-                server_socket.send(str(message['id']))
-            else:
-                server_socket.send_string('Error')
+                
+            self.messages.put_nowait(message_tuple)
+            server_socket.send(str(message_tuple['id']))

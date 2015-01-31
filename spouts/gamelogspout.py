@@ -1,5 +1,10 @@
+import subprocess
+import time
+import os
+
 from spouts.basespout import BaseSpout
 from models.gamelogmodel import GamelogModel
+from models.hostmodel import HostModel
 from lib import *
 
 class GamelogSpout(BaseSpout):
@@ -11,13 +16,41 @@ class GamelogSpout(BaseSpout):
     
     def next_tuple(self):
         self.logger.info('%-10s Starting read the data ...', 'Gamelog')
+        basedir, bin = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+        data_dir = os.path.join(basedir, 'data')
+        out_file = os.path.join(data_dir, 'gamelog_' + time.strftime('%Y%m%d%H%M', time.localtime()) + '.txt')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+        f = open(out_file, 'w')
+        print out_file
         set_game_area_plat()
         areas = get_game_area_plat()['area']
+        hm = HostModel()
+        hosts = hm.get_list({'flag.available' : True})
+        for host in hosts:
+            command = ('t=$(expr $(date +%s) / 300 - 1);'
+                       't=$(date --date @$(expr $t \* 300) +%Y%m%d%H%M);' 
+                       'for g in /home/mhgame/games/*;' 
+                       'do find $g/log/gamelog -name mh_$t.log | xargs sed -e "s/^/$(basename $g)\t/";' 
+                       'done 2>/dev/null')
+            ssh = subprocess.Popen(["ssh", "mhgame@%s" % i, command],
+                                   shell=False,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE
+            )
+            for line in  ssh.stdout.readlines():
+                f.write(str(line))
+        f.close()
+            
         gamelog = '/home/cui/log_analytics/gamelog.txt'
-        gamelog = '/home/cui/log_analytics/gamelog_2015-60.txt'
+        #gamelog = '/home/cui/log_analytics/gamelog_2015-60.txt'
+        gamelog = out_file
         try:
             with open(gamelog, 'r') as f:
                 for line in f:
+                    print line
                     line = gamelog_parse(line)
                     if line:
                         line = gamelog_filter(line)
