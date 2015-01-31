@@ -46,6 +46,7 @@ class ServerModel(MongoModel):
                 mid = str(__id['_id'])
                 self.update(mid, search)
             else:
+                search['game'] = recv_body['game']
                 self.insert(search)
 
             #if search.get('_id', 0):

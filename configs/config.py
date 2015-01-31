@@ -33,6 +33,7 @@ PUBTITLE = {
     'payretentiontrace':'2017',
     'shopfilter' :      '2018',
     #'shop' :           '2019',
+    'userpayfilter' :   '2020',
 }
 
 END_TOPO_SUCCESS = 200

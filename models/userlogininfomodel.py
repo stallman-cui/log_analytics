@@ -24,6 +24,7 @@ class UserLoginInfoModel(MongoModel):
     def handle(self, recv_body):
         if recv_body:
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 acctid = str(recv_body['data']['acct'])
                 log_type = recv_body['data']['type']
@@ -37,6 +38,7 @@ class UserLoginInfoModel(MongoModel):
                     return
             
             search = {
+                'game' : game,
                 'area' : area,
                 'plat' : plat,
                 'acctid' : acctid

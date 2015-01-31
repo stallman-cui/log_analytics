@@ -22,6 +22,7 @@ class ShopModel(MongoModel):
     def handle(self, recv_body):
         if recv_body:
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 plat_arr = recv_body['data']['URS'].split('_')
                 buyitemno = recv_body['data']['buyitemno']
@@ -48,6 +49,7 @@ class ShopModel(MongoModel):
                 mid = result['_id']
                 self.update(mid, search)
             else:
+                search['game'] = game
                 search['name'] = name
                 search['buyitemno'] = buyitemno
                 search['price'] = total / count

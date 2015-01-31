@@ -3,9 +3,8 @@ import json
 import logging
 
 from configs.config import PUBTITLE, END_TOPO_SUCCESS
-from bolts.bolt import Bolt
 
-class BaseBolt(Bolt):
+class BaseBolt():
     ''' handle the login log from gamelog
     '''
     num = 0
@@ -45,7 +44,7 @@ class BaseBolt(Bolt):
             self.num += 1
             BaseBolt.num += 1
             if BaseBolt.num % 1000 == 0:
-                self.logger.info('%-30s execute message id: %d', self.model.__module__, recv_tuple['id'])
+                self.logger.info('%-30s execute message id: %d ', self.model.__module__, recv_tuple['id'])
             
             body = self.model.handle(recv_tuple['body'])
             #self.logger.debug('%-30s recv_body: %s: ', self.model.__module__, body)
@@ -54,6 +53,7 @@ class BaseBolt(Bolt):
                     self.logger.debug('%-30s done messsage id: %d',
                                       self.model.__module__, 
                                       int(recv_tuple['id']))
+
                 else:
                     recv_tuple['body'] = body
                     recv_tuple['state'] = self.conf['state']

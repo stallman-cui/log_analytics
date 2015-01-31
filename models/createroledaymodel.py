@@ -20,6 +20,7 @@ class CreateroleDayModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
+            game = recv_body['game']
             area = recv_body['area']
             plat = recv_body['plat']
             ts = recv_body['ts']
@@ -31,6 +32,7 @@ class CreateroleDayModel(MongoModel):
                 'ts' : get_ts(ts, interval = 'day')
             }
             __id = self.get_one(search)
+            search['game'] = game
             if __id:
                 userlist = __id['userlist']
                 mid = str(__id['_id'])

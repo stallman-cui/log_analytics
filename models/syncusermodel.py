@@ -1,7 +1,7 @@
-class PaymentModel():
+class SyncUserModel():
 
     def get_conf(self):
         conf = {
-            'state' : 'payment'
+            'state' : 'syncuser'
         }
         return conf

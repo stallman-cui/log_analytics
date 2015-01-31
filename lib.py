@@ -2,6 +2,10 @@ import re
 import json
 import time
 import logging
+import os
+
+from models.areamodel import AreaModel
+from models.platmodel import PlatModel
 
 opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount', 
           'logout_logcount',
@@ -82,3 +86,30 @@ def log_config():
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
+
+
+def set_game_area_plat():
+    am = AreaModel()
+    pm = PlatModel()
+    areas = am.get_list()
+    plats = pm.get_list()
+    game_area = {}
+    plat_id_name = {}
+    for area in areas:
+        game_area[str(area['_id'])] = area['game']
+        
+    for plat in plats:
+        plat_id_name[plat['id']] = plat['name']
+
+    game_area_plat = {
+        'area' : game_area,
+        'plat' : plat_id_name
+    }
+    with open(os.path.join('/home/cui/log_analytics', 'game_area_plat.json'), 'w') as f:
+        json.dump(game_area_plat, f)
+
+def get_game_area_plat():
+    with open(os.path.join('/home/cui/log_analytics', 'game_area_plat.json'), 'r') as f:
+        game_area_plat = json.load(f)
+        return game_area_plat
+

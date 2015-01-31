@@ -25,6 +25,7 @@ class LoginRetentionModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
+            game = recv_body['game']
             area = recv_body['area']
             plat = recv_body['plat']
             ts = recv_body['ts']
@@ -62,6 +63,7 @@ class LoginRetentionModel(MongoModel):
                         self.update(mid, search)
                                 
                     else:
+                        search['game'] = game
                         self.insert(search)
 
             return END_TOPO_SUCCESS

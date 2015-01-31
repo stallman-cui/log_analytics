@@ -23,6 +23,7 @@ class PayorderDetailModel(MongoModel):
             if not recv_body['data']['extra'].get('reqstr', 0):
                 return
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 plat_arr = recv_body['data']['URS'].split('_')
                 orderid = recv_body['data']['extra']['reqstr']
@@ -36,6 +37,7 @@ class PayorderDetailModel(MongoModel):
 
             plat = str(plat_arr[len(plat_arr) -2])
             search = {
+                'game' : game,
                 'area' : area,
                 'plat' : plat,
                 'orderid' : orderid,

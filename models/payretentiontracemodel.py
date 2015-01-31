@@ -25,6 +25,7 @@ class PayRetentionTraceModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
+            game = recv_body['game']
             area = recv_body['area']
             plat = recv_body['plat']
             ts = recv_body['ts']
@@ -61,6 +62,7 @@ class PayRetentionTraceModel(MongoModel):
                             mid = str(result['_id'])
                             self.update(mid, search)
                         else:
+                            search['game'] = game
                             self.insert(search)
                             
                     else: # createrole is emtpy

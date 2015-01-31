@@ -1,20 +1,15 @@
 import zmq.green as zmq
 import logging
-from spouts.spout import Spout
 
-class BaseSpout(Spout):
-    """ read the payment data,
-    and send it
+class BaseSpout():
+    """ read the data, and send it
     """
-    MAX = 999999
-    message_id = 0
-
     def __init__(self, model, topology_context='', output_collector=''):
         self.logger = logging.getLogger('online_analytics')
-        self.open()
         self.model = model()
         self.conf = self.model.get_conf()
         self.count = 0
+        self.open()
 
     def open(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is initialized '''
@@ -35,39 +30,9 @@ class BaseSpout(Spout):
         ''' When this method is called, the spout emit 
         tuples to the output collector. 
         '''
-        self.logger.info('%-10s read Starting  ... ', self.model.__module__)
-        all_data = self.model.get_data()
-        if not all_data:
-            self.logger.info('%-10s read ERROR  ... ', self.model.__module__)
-            return
-        for line in all_data:
-            BaseSpout.message_id += 1
-            message_tuple = {
-                'id' : BaseSpout.message_id % BaseSpout.MAX,
-                'body' : line,
-                'state' : self.conf['state']
-            }
-            #self.logger.debug('%-10s data %s', self.model.__module__, message_tuple)
-            self.count += 1
-            self.socket.send_json(message_tuple)
-            ack_no = self.socket.recv_string()
-            if ack_no == str(message_tuple['id']):
-                self.ack(ack_no)
-            else:
-                self.fail(ack_no)
-        self.logger.info('%-10s records count %d, %d', self.model.__module__, self.count, BaseSpout.message_id)
-        self.logger.info('%-10s read End   ...', self.model.__module__)
 
     def ack(self, msg_id):
         ''' The tuple emiited by this spout with the msg_id has been fully processed. '''
 
     def fail(self, msg_id):
         ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
-        self.logger.error('%-20s emiited message id %d failed.', self.model.__module__, int(msg_id))
-
-        print("Gamelog: request was Failed, messsage_id: %d \n" % int(msg_id))
-
-
-
-
-

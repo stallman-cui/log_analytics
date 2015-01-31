@@ -20,10 +20,14 @@ class LoginDayModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
-            area = recv_body['area']
-            plat = recv_body['plat']
-            ts = recv_body['ts']
-            acctid = recv_body['acctid']
+            try:
+                game = recv_body['game']
+                area = recv_body['area']
+                plat = recv_body['plat']
+                ts = recv_body['ts']
+                acctid = recv_body['acctid']
+            except KeyError:
+                print recv_body
           
             search = {
                 'area' : area,
@@ -31,6 +35,7 @@ class LoginDayModel(MongoModel):
                 'ts' : get_ts(ts, interval = 'day')
             }
             __id = self.get_one(search)
+            search['game'] = game
             if __id:
                 userlist = __id['userlist']
                 mid = str(__id['_id'])

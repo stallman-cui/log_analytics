@@ -24,6 +24,7 @@ class MainlineModel(MongoModel):
             if not recv_body['data'].get('task_id', 0):
                 return
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 plat_arr = recv_body['data']['URS'].split('_')
                 task_id = recv_body['data']['task_id']
@@ -106,6 +107,7 @@ class MainlineModel(MongoModel):
                 mid = str(tod_result['_id'])
                 self.update(mid, search)
             else:
+                search['game'] = game
                 self.insert(search)
                 
             return END_TOPO_SUCCESS

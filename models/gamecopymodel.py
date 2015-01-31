@@ -24,6 +24,7 @@ class GameCopyModel(MongoModel):
             if recv_body['data']['amount'] != -1:
                 return
             try:    
+                game = recv_body['game']
                 area = recv_body['area']
                 plat = str(recv_body['data']['CorpId'])
                 copyid = recv_body['data']['get_id']
@@ -95,6 +96,7 @@ class GameCopyModel(MongoModel):
                 mid = str(tod_result['_id'])
                 self.update(mid, search)
             else:
+                search['game'] = game
                 search['name'] = name
                 search['level'] = copyid
                 self.insert(search)

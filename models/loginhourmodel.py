@@ -21,6 +21,7 @@ class LoginHourModel(MongoModel):
     def handle(self, recv_body):
         if recv_body:
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 plat = str(recv_body['data']['corpid'])
                 acctid = str(recv_body['data']['acct'])
@@ -35,6 +36,7 @@ class LoginHourModel(MongoModel):
                 'ts' : get_ts(ts, interval = 'hour')
             }
             __id = self.get_one(search)
+            search['game'] = game
             if __id:
                 userlist = __id['userlist']
                 mid = str(__id['_id'])

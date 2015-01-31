@@ -21,6 +21,7 @@ class CoinDayModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
+            game = recv_body['game']
             area = recv_body['area']
             plat = recv_body['plat']
             ts = recv_body['ts']
@@ -33,6 +34,7 @@ class CoinDayModel(MongoModel):
             }
             __id = self.get_one(search)
             search['coin'] = coin
+            search['game'] = game
             if __id:
                 mid = str(__id['_id'])
                 search['coin'] += __id['coin']
@@ -40,8 +42,4 @@ class CoinDayModel(MongoModel):
             else:
                 self.insert(search)
 
-            #if search.get('_id', 0):
-            #   del search['_id'] 
-            #return search              
-  
         return END_TOPO_SUCCESS

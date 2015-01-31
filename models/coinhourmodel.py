@@ -1,4 +1,5 @@
 from common.mongo import MongoModel
+from configs.config import END_TOPO_SUCCESS
 
 class CoinHourModel(MongoModel):
     def get_db(self):
@@ -19,6 +20,7 @@ class CoinHourModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
+            game = recv_body['game']
             area = recv_body['area']
             plat = recv_body['plat']
             ts = recv_body['ts']
@@ -31,6 +33,7 @@ class CoinHourModel(MongoModel):
             }
             __id = self.get_one(search)
             search['coin'] = coin
+            search['game'] = game
             if __id:
                 mid = str(__id['_id'])
                 search['coin'] += __id['coin']
@@ -38,7 +41,4 @@ class CoinHourModel(MongoModel):
             else:
                 self.insert(search)
 
-            #if search.get('_id', 0):
-            #   del search['_id'] 
-            #search['coin'] = coin
-            #return search                
+        return END_TOPO_SUCCESS
