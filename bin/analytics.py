@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from gevent import monkey
+monkey.patch_all()
 import sys
 import logging
 import os
@@ -56,13 +58,13 @@ class Analytics():
         spout = model()
         while True:
             spout.next_tuple()
-            gevent.sleep(3600)
+            gevent.sleep(300)
 
     def init_base(self):
         thread = []
         thread.append(gevent.spawn(self.transfer.receiver))
         thread.append(gevent.spawn(self.transfer.sender))
-        thread.append(gevent.spawn(self.update_status))
+        #thread.append(gevent.spawn(self.update_status))
         gevent.joinall(thread)
 
     def init_spout(self):
@@ -104,7 +106,8 @@ class Analytics():
         spout_process.start()
         
 if __name__ == "__main__":
-    online_analytics = Analytics('/home/cui/log_analytics/log.pid')
+    log_file = os.path.join(basedir, 'log.pid')
+    online_analytics = Analytics(log_file)
     online_analytics.run()
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:

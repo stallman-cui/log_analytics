@@ -30,25 +30,30 @@ class ShopFilterModel(MongoModel):
                 print('KeyError: ', str(e))
                 return
 
-            plat = str(plat_arr[1])            
-            record_key = '_'.join([str(ts), str(uid), str(buyitemno)])
+            plat = str(plat_arr[1])         
+            acctid = plat_arr[0]
+            record_key = '_'.join([str(ts), uid, str(buyitemno)])
 
             search = {
                 'area' : area,
                 'plat' : plat,
-                'ts' : get_ts(ts, interval='day')
+                'ts' : get_ts(ts, interval='day'),
+                'buyitemno' : buyitemno
             }
             result = self.get_one(search)
             if result:
-                search['userlist'] = result['userlist']
-                if record_key not in result['userlist']:
-                    search['userlist'].append(record_key)
+                search['filterlist'] = result['filterlist']
+                if record_key not in result['filterlist']:
+                    search['filterlist'].append(record_key)
+                    if acctid not in result['userlist']:
+                        search['userlist'].append(acctid)
                     mid = str(result['_id'])
                     self.update(mid, search)
                 else:
                     return
             else:
-                search['userlist'] = [record_key, ]
+                search['userlist'] = [acctid, ]
+                search['filterlist'] = [record_key, ]
                 self.insert(search)
             
             return recv_body

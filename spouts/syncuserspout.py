@@ -1,9 +1,9 @@
 import time
 
 from spouts.basespout import BaseSpout
-from modes.syncusermodel import SyncUserModel
-from accountlistmodel import AccountListModel
-from accountusermodel import AccountUserModel
+from models.syncusermodel import SyncUserModel
+from models.accountlistmodel import AccountListModel
+from models.accountusermodel import AccountUserModel
 from lib import *
 
 class SyncUserSpout(BaseSpout):
@@ -16,14 +16,15 @@ class SyncUserSpout(BaseSpout):
         self.logger.info('%-10s Starting read the data ...', 'Syncuser')
         set_game_area_plat()
         areas = get_game_area_plat()['area']
+        ts = int(time.time())
         for area in areas.keys():
+            game = areas[area]
             search = {
                 'area' : area
             }
             display = {
                 '_id' : 0,
                 'area' : 1,
-                'data.user.Uid' : 1,
                 'data.user.URS' : 1,
                 'data.user.LoginTime' : 1,
                 'data.user.Grade' : 1,
@@ -32,12 +33,10 @@ class SyncUserSpout(BaseSpout):
                 'data.user.TotalScore' : 1,
                 'data.user.Score' : 1
             }
-            userlist = {}
             user_data = self.usermodel.get_list(search, display)
             for user_item in user_data:
                 user = user_item['data']['user']
                 urs_arr = user['URS'].split('_')
-                plat = str(urs_arr[len(urs_arr) - 2])
                 if 'dl' == game:
                     user['Score'] = user['TotalScore']
 
@@ -46,57 +45,33 @@ class SyncUserSpout(BaseSpout):
                 }
                 
                 list_data = self.listmodel.get_one(search, {'data.YuanBao':1})
-                rest_yuanbao = list_data['data']['YuanBao']
-                ts = int(time.time())
-                uid = str(user['Uid'])
-                if not userlist.get(area, 0):
-                    userlist[area] = {
-                        plat : {
-                            uid : {
-                                'urs' : user['URS'],
-                                'login_time' : user['LoginTime'],
-                                'grade' : user['Grade'],
-                                'name' : user['Name'],
-                                'birthday' : user['Birthday'],
-                                'score' : user['Score'],
-                                'rest_yuanbao' : rest_yuanbao,
-                                'ts' : ts,
-                            }
-                        }
-                    }
-                elif not userlist[area].get(plat, 0):
-                    userlist[area][plat] = {
-                        uid : {
-                            'urs' : user['URS'],
-                            'login_time' : user['LoginTime'],
-                            'grade' : user['Grade'],
-                            'name' : user['Name'],
-                            'birthday' : user['Birthday'],
-                            'score' : user['Score'],
-                            'rest_yuanbao' : rest_yuanbao,
-                            'ts' : ts,
-                        }
-                    }
+                rest_yuanbao = 0
+                if list_data:
+                    rest_yuanbao = list_data['data']['YuanBao']
+                size = len(urs_arr)
+                print urs_arr
+                acctid = ''
+                if size > 2:
+                    for i in range(0, size - 2):
+                        acctid += urs_arr[i]
                 else:
-                    userlist[area][plat][uid] = {
-                        'urs' : user['URS'],
-                        'login_time' : user['LoginTime'],
-                        'grade' : user['Grade'],
-                        'name' : user['Name'],
-                        'birthday' : user['Birthday'],
-                        'score' : user['Score'],
-                        'rest_yuanbao' : rest_yuanbao,
-                        'ts' : ts,
-                    }
+                    acctid = urs_arr[0]
+                plat = str(urs_arr[size - 2])
 
-        for karea, varea in userlist.items():
-            for kplat, vplat in varea.items():
                 search = {
-                    'game' : areas[karea],
-                    'area' : karea,
-                    'plat' : kplat,
-                    'userlist' : vplat
+                    'game' : game,
+                    'area' : area,
+                    'plat' : plat,
+                    'acctid' : acctid,
+                    'login_time' : user['LoginTime'],
+                    'grade' : user['Grade'],
+                    'name' : user['Name'],
+                    'birthday' : user['Birthday'],
+                    'score' : user['Score'],
+                    'rest_yuanbao' : rest_yuanbao,
+                    'ts' : ts
                 }
+                
                 message_tuple = {
                     'body' : search,
                     'state' : self.conf['state']
@@ -109,4 +84,4 @@ class SyncUserSpout(BaseSpout):
                 else:
                     self.fail(ack_no)
 
-        self.logger.info('%-10s Starting read the data ...', 'Syncuser')
+        self.logger.info('%-10s End read the data ...', 'Syncuser')

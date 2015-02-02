@@ -1,9 +1,8 @@
 import logging
 
-from bolts.bolt import Bolt
 from configs.config import END_TOPO_SUCCESS
 
-class TimerBolt(Bolt):
+class TimerBolt():
     ''' handle the login log from gamelog
     '''
     def __init__(self, model, topology_context='', output_collector=''):

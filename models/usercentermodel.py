@@ -9,7 +9,7 @@ class UserCenterModel(MongoModel):
         return 'user'
 
     def get_keys(self):
-        return 'area', 'plat', 'uid'
+        return 'area', 'plat', 'acctid'
 
     def get_conf(self):
         conf = {
@@ -20,26 +20,5 @@ class UserCenterModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
-            game = recv_body['game']
-            area = recv_body['area']
-            plat = recv_body['plat']
-            userlist = recv_body['userlist']
-            
-            for uid, info in userlist.items():
-                search = {
-                    'game' : game,
-                    'area' : area,
-                    'plat' : plat,
-                    'uid' : uid,
-                    'urs' : info['urs'],
-                    'login_time' : info['login_time'],
-                    'grade' : info['grade'],
-                    'name' : info['name'],
-                    'birthday' : info['birthday'],
-                    'score' : info['score'],
-                    'rest_yuanbao' : info['rest_yuanbao'],
-                    'ts' : info['ts']                    
-                }
-                self.upsert(search)
-                    
+            self.upsert(recv_body)
             return END_TOPO_SUCCESS

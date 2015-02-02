@@ -34,6 +34,7 @@ PUBTITLE = {
     'shopfilter' :      '2018',
     #'shop' :           '2019',
     'userpayfilter' :   '2020',
+    'syncuser' : '2021',
 }
 
 END_TOPO_SUCCESS = 200

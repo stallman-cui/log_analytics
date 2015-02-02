@@ -1,6 +1,6 @@
 from spouts.gamelogspout import GamelogSpout
 from spouts.paymentspout import PaymentSpout
-#from models.syncuserspout import SyncUserSpout
+from spouts.syncuserspout import SyncUserSpout
 
 from models.signuphourmodel import SignupHourModel
 from models.loginhourmodel import LoginHourModel
