@@ -26,7 +26,6 @@ from models.shopfiltermodel import ShopFilterModel
 from models.userpayfiltermodel import UserPayFilterModel
 from models.userpaymodel import UserPayModel
 
-from models.combatmodel import CombatModel
 from models.usercentermodel import UserCenterModel
 from models.userlevelmodel import UserLevelModel
 from models.activedaymodel import ActiveDayModel
@@ -34,30 +33,31 @@ from models.serverstarttimemodel import ServerStartTimeModel
 from models.activeweekmodel import ActiveWeekModel
 from models.activemonthmodel import ActiveMonthModel
 
-all_bolt_models = [LoginHourModel, SignupHourModel, 
-                   CreateroleHourModel, 
-                   LoginDayModel, SignupDayModel, 
-                   CreateroleDayModel, 
-                   PaySummaryModel, ServerModel,
-
-                   PayorderDetailModel, UserLoginInfoModel,
-                   CoinFilterModel, CoinTypeModel,
-                   CoinHourModel, CoinDayModel,
-                   MainlineModel, 
-                   PayRetentionTraceModel,
-                   PayTraceDayModel,
-                   LoginRetentionModel,
-                   GameCopyModel,
-                   ShopFilterModel, ShopModel,
-                   UserPayFilterModel, UserPayModel,
+bolt_models_1 = [LoginHourModel, SignupHourModel, 
+                 CreateroleHourModel, 
+                 LoginDayModel, SignupDayModel, 
+                 CreateroleDayModel, 
+                 PaySummaryModel, ServerModel,
+                 CoinFilterModel, CoinTypeModel,
+                 CoinHourModel, CoinDayModel,
+                 PayRetentionTraceModel,
+                 PayTraceDayModel,
+                 LoginRetentionModel,
+                 UserLoginInfoModel,
 ]
 
-bolt_sync_models = [UserCenterModel, UserLevelModel, CombatModel, ]
+bolt_models_2 = [PayorderDetailModel, 
+                 MainlineModel, 
+                 GameCopyModel,
+                 ShopFilterModel, ShopModel,
+                 UserPayFilterModel, UserPayModel,
+                 UserCenterModel,
+]
 
 bolt_timer_models = [ServerStartTimeModel, ActiveDayModel,
-                      ActiveWeekModel,
-                      ActiveMonthModel,
+                     ActiveWeekModel,
+                     ActiveMonthModel,
+                     UserLevelModel,
 ]
 
-all_spouts =  [GamelogSpout, PaymentSpout, ]#SyncUserSpout]
-
+all_spouts =  [GamelogSpout, PaymentSpout, SyncUserSpout]

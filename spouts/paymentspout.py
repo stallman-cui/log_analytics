@@ -11,6 +11,8 @@ from models.paymentmodel import PaymentModel
 from lib import get_period_ts
 
 class PaymentSpout(BaseSpout):
+    timer = 300
+    
     def __init__(self):
         BaseSpout.__init__(self, model=PaymentModel)
         self.__ch = pycurl.Curl()

@@ -15,8 +15,8 @@ from transfer import Transfer
 from worker import Worker
 from bolts.basebolt import BaseBolt
 from bolts.timerbolt import TimerBolt
-from allmodel import all_bolt_models
-from allmodel import bolt_sync_models
+from allmodel import bolt_models_1
+from allmodel import bolt_models_2
 from allmodel import bolt_timer_models
 from allmodel import all_spouts
 
@@ -42,23 +42,19 @@ class Analytics():
             bolt.execute()
             gevent.sleep(0)
 
-    def make_timer_bolt(self, model):
+    def make_timer_bolt(self, model, timer):
         bolt = TimerBolt(model)
-        while True:
-            gevent.sleep(600)
-            bolt.execute()
+        if timer:
+            while True:
+                bolt.execute()
+                gevent.sleep(timer)
 
-    def make_sync_bolt(self, model):
-        bolt = BaseBolt(model)
-        while True:
-            bolt.execute()
-            gevent.sleep(3600)
-    
-    def make_spout(self, model):
+    def make_spout(self, model, timer):
         spout = model()
-        while True:
-            spout.next_tuple()
-            gevent.sleep(300)
+        if timer:
+            while True:
+                spout.next_tuple()
+                gevent.sleep(timer)
 
     def init_base(self):
         thread = []
@@ -70,39 +66,42 @@ class Analytics():
     def init_spout(self):
         coroutines = []
         for each_spout in all_spouts:
-            coroutines.append(gevent.spawn(self.make_spout, each_spout))
+            timer = each_spout.timer
+            coroutines.append(gevent.spawn(self.make_spout, each_spout, timer))
   
         gevent.joinall(coroutines)
         
-    def init_bolt(self):
+    def init_bolt_1(self):
         coroutines = []
-        for each_model in all_bolt_models:
+        for each_model in bolt_models_1:
+            coroutines.append(gevent.spawn(self.make_bolt, each_model))
+        gevent.joinall(coroutines)
+
+    def init_bolt_2(self):
+        coroutines = []
+        for each_model in bolt_models_2:
             coroutines.append(gevent.spawn(self.make_bolt, each_model))
         gevent.joinall(coroutines)
 
     def init_timer_bolt(self):
+        gevent.sleep(60)
         coroutines = []
         for each_model in bolt_timer_models:
-            coroutines.append(gevent.spawn(self.make_timer_bolt, each_model))
+            timer = each_model.timer
+            coroutines.append(gevent.spawn(self.make_timer_bolt, each_model, timer))
         gevent.joinall(coroutines)
 
-    def init_sync_bolt(self):
-        coroutines = []
-        for each_model in bolt_sync_models:
-            coroutines.append(gevent.spawn(self.make_sync_bolt, each_model))
-        gevent.joinall(coroutines)
-        
     def run(self):
         base_process = multiprocessing.Process(name='base_thread', target=self.init_base)
-        bolt_process = multiprocessing.Process(name='bolt', target=self.init_bolt)
+        bolt_process_1 = multiprocessing.Process(name='bolt1', target=self.init_bolt_1)
+        bolt_process_2 = multiprocessing.Process(name='bolt2', target=self.init_bolt_2)
         bolt_timer_process = multiprocessing.Process(name='timerbolt', target=self.init_timer_bolt)
-        #bolt_sync_process = multiprocessing.Process(name='syncbolt', target=self.init_sync_bolt)
         spout_process = multiprocessing.Process(name='spout', target=self.init_spout)
         
         base_process.start()
-        bolt_process.start()
+        bolt_process_1.start()
+        bolt_process_2.start()
         bolt_timer_process.start()
-        #bolt_sync_process.start()
         spout_process.start()
         
 if __name__ == "__main__":
@@ -119,6 +118,6 @@ if __name__ == "__main__":
         else:
             print('Unknown command')
             sys.exit(2)
-    #else:
-    #    print('Usage: %s start|stop|restart' % sys.argv[0])
-    #    sys.exit(2)
+    else:
+        print('Usage: %s start|stop|restart' % sys.argv[0])
+        sys.exit(2)

@@ -9,48 +9,32 @@ class CombatModel(MongoModel):
         return 'viji'
 
     def get_keys(self):
-        return 'game', 'area', 'plat'
-
-    def get_conf(self):
-        conf = {
-            'sub_conf' : ['syncuser', ],
-            'state' : 'combat'
-        }
-        return conf
+        return 'area', 'plat'
 
     def handle(self, recv_body):
         if recv_body:
-            game = recv_body['game']
-            area = recv_body['area']
-            plat = recv_body['plat']
-            users = recv_body['userlist']
-            
-            userlist = []
-            for uid, info in users.items():
-                urs_arr = info['URS'].split('_')
-                acctid = ''
-                size = len(urs_arr)
-                if size > 2:
-                    for i in range(0, size - 2):
-                        acctid += str(urs_arr[i])
-                else:
-                    acctid = urs_arr[0]
+            for karea, varea in recv_body.items():
+                for kplat, vplat in varea.items():
+                    plat_users = []
+                    for user in vplat:
+                        search = {
+                            'Uid' : user['uid'],
+                            'acctid' : user['acctid'],
+                            'role_name' : user['name'],
+                            'Score' : user['score'],
+                            'Grade' : user['grade'],
+                            'reg_day' : user['birthday'],
+                            'login_time' : user['login_time'] 
+                        }
+                        game = user['game']
+                    plat_users.append(search)
 
-                userlist.append({
-                    'Uid' : uid,
-                    'acctid' : acctid,
-                    'role_name' : info['name'],
-                    'Score' : info['score'],
-                    'Grade' : info['grade'],
-                    'reg_day' : info['birthday'],
-                    'login_time' : info['login_time']
-                })
-                
-            search = {
-                'game' : game,
-                'area' : area,
-                'plat' : plat,
-                'userlist' : userlist
-            }
-            self.upsert(search)
+                    fix_data = {
+                        'game' : game,
+                        'area' : karea,
+                        'plat' : kplat,
+                        'userlist' : plat_users
+                    }
+                    self.upsert(fix_data)
+
             return END_TOPO_SUCCESS

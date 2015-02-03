@@ -8,6 +8,8 @@ from configs.config import END_TOPO_SUCCESS
 from lib import *
 
 class ActiveWeekModel(MongoModel):
+    timer = 60 * 60 * 24 * 7
+
     def get_db(self):
         return 'analytics'
 
@@ -21,8 +23,7 @@ class ActiveWeekModel(MongoModel):
         login_model = LoginDayModel()
         area_model = AreaModel()
         sstm = ServerStartTimeModel()
-        #now = int(time.time())
-        now = 1420646400
+        now = int(time.time())
         areas = area_model.get_list()
         for area_item in areas:
             for plat in area_item['plats']:

@@ -9,7 +9,7 @@ class UserCenterModel(MongoModel):
         return 'user'
 
     def get_keys(self):
-        return 'area', 'plat', 'acctid'
+        return 'area', 'plat', 'uid'
 
     def get_conf(self):
         conf = {

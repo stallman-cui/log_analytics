@@ -7,6 +7,8 @@ from models.accountusermodel import AccountUserModel
 from lib import *
 
 class SyncUserSpout(BaseSpout):
+    timer = 3600
+
     def __init__(self):
         BaseSpout.__init__(self, model=SyncUserModel)
         self.usermodel = AccountUserModel('002_h_user')
@@ -26,6 +28,7 @@ class SyncUserSpout(BaseSpout):
                 '_id' : 0,
                 'area' : 1,
                 'data.user.URS' : 1,
+                'data.user.Uid' : 1,
                 'data.user.LoginTime' : 1,
                 'data.user.Grade' : 1,
                 'data.user.Name' : 1,
@@ -49,7 +52,6 @@ class SyncUserSpout(BaseSpout):
                 if list_data:
                     rest_yuanbao = list_data['data']['YuanBao']
                 size = len(urs_arr)
-                print urs_arr
                 acctid = ''
                 if size > 2:
                     for i in range(0, size - 2):
@@ -63,6 +65,7 @@ class SyncUserSpout(BaseSpout):
                     'area' : area,
                     'plat' : plat,
                     'acctid' : acctid,
+                    'uid' : user['Uid'],
                     'login_time' : user['LoginTime'],
                     'grade' : user['Grade'],
                     'name' : user['Name'],

@@ -1,8 +1,12 @@
 from common.mongo import MongoModel 
-from lib import get_ts
+from models.usercentermodel import UserCenterModel
+from models.combatmodel import CombatModel
 from configs.config import END_TOPO_SUCCESS
+from lib import *
 
 class UserLevelModel(MongoModel):
+    timer = 60 * 60 * 24
+
     def get_db(self):
         return 'analytics'
 
@@ -10,36 +14,57 @@ class UserLevelModel(MongoModel):
         return 'user_level'
 
     def get_keys(self):
-        return 'game', 'area', 'plat'
+        return 'area', 'plat'
 
-    def get_conf(self):
-        conf = {
-            'sub_conf' : ['syncuser', ],
-            'state' : 'userlevel'
-        }
-        return conf
+    def handle(self):
+        usercenter_model = UserCenterModel()
+        combat_model = CombatModel()
+        users = usercenter_model.get_list()
+        levellist = {}
+        userlist = {}
+        for user in users:
+            area = user['area']
+            plat = user['plat']
+            grade = str(user['grade'])
+            if not levellist.get(area, 0):
+                levellist[area] = {
+                    plat : {
+                        grade : 1
+                    }
+                }
+                userlist[area] = {
+                    plat : [user,]
+                }
 
-    def handle(self, recv_body):
-        if recv_body:
-            game = recv_body['game']
-            area = recv_body['area']
-            plat = recv_body['plat']
-            users = recv_body['userlist']
-            levellist = {}
-            for uid, info in users.items():
-                grade = info['grade']
-                if not levellist.get(grade, 0):
-                    levellist[grade] = 1
-                else:
-                    levellist[grade] += 1
+            elif not levellist.get(plat, 0):
+                levellist[area][plat] = {
+                    grade : 1
+                }
+                userlist[area][plat] = [user,]
+            else:
+                levellist[area][plat][grade] += 1
+                userlist[area][plat].append(user)
 
-            search = {
-                'game' : game,
-                'area' : area,
-                'plat' : plat,
-                'leveldata' : levellist,
-                'total_user' : len(levellist),
-                'ts' : get_ts(info['ts'], interval='day')            
-            }
-            self.upsert(search)
-            return END_TOPO_SUCCESS
+        areas = get_game_area_plat()['area']        
+        ts = get_ts(int(time.time(), interval='day'))
+        for karea, varea in levellist.items():
+            for kplat, vplat in varea.items():
+                user_count = 0
+                for level_num in vplat.values():
+                    user_count += level_num
+                search = {
+                    'game' : areas[karea],
+                    'area' : karea,
+                    'plat' : kplat,
+                    'leveldata' : vplat,
+                    'total_user' : user_count,
+                    'ts' : ts
+                }
+                self.upsert(search)
+                
+                # combat model update data
+                # this sub the seach to mongodb
+                # just here special
+                combat_model.handle(userlist)
+
+        return END_TOPO_SUCCESS
