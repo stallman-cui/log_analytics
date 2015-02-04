@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-topology_file = '/home/cui/log_analytics/configs/topology.etc'
+import os
+
+config_dir = os.path.dirname(os.path.abspath(__file__))
+topology_file = os.path.join(config_dir, 'topology.etc')
+ssh_user = 'mhgame'
 
 PUBTITLE = {
     # gamelog's op.code

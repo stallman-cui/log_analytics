@@ -1,3 +1,5 @@
+import time
+
 from common.mongo import MongoModel 
 from models.usercentermodel import UserCenterModel
 from models.combatmodel import CombatModel
@@ -19,7 +21,7 @@ class UserLevelModel(MongoModel):
     def handle(self):
         usercenter_model = UserCenterModel()
         combat_model = CombatModel()
-        users = usercenter_model.get_list()
+        users = usercenter_model.get_list({}, {'_id':0})
         levellist = {}
         userlist = {}
         for user in users:
@@ -36,17 +38,25 @@ class UserLevelModel(MongoModel):
                     plat : [user,]
                 }
 
-            elif not levellist.get(plat, 0):
+            elif not levellist[area].get(plat, 0):
                 levellist[area][plat] = {
                     grade : 1
                 }
                 userlist[area][plat] = [user,]
+            elif not levellist[area][plat].get(grade, 0):
+                levellist[area][plat][grade] = 1
+                userlist[area][plat].append(user)
             else:
                 levellist[area][plat][grade] += 1
                 userlist[area][plat].append(user)
 
+        # combat model update data
+        # this sub the seach to mongodb
+        # just here special
+        combat_model.handle(userlist)
+
         areas = get_game_area_plat()['area']        
-        ts = get_ts(int(time.time(), interval='day'))
+        ts = get_ts(int(time.time()), interval='day')
         for karea, varea in levellist.items():
             for kplat, vplat in varea.items():
                 user_count = 0
@@ -62,9 +72,6 @@ class UserLevelModel(MongoModel):
                 }
                 self.upsert(search)
                 
-                # combat model update data
-                # this sub the seach to mongodb
-                # just here special
-                combat_model.handle(userlist)
+
 
         return END_TOPO_SUCCESS

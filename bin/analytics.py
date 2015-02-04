@@ -46,6 +46,7 @@ class Analytics():
         bolt = TimerBolt(model)
         if timer:
             while True:
+                gevent.sleep(600)
                 bolt.execute()
                 gevent.sleep(timer)
 
@@ -84,7 +85,6 @@ class Analytics():
         gevent.joinall(coroutines)
 
     def init_timer_bolt(self):
-        gevent.sleep(60)
         coroutines = []
         for each_model in bolt_timer_models:
             timer = each_model.timer

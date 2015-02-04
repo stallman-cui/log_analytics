@@ -4,7 +4,7 @@ from configs.config import END_TOPO_SUCCESS
 from lib import *
 
 class ServerStartTimeModel(MongoModel):
-    timer = 60 * 60 * 24
+    timer = 60 * 60
 
     def get_db(self):
         return 'analytics'

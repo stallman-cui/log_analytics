@@ -27,7 +27,7 @@ class CombatModel(MongoModel):
                             'login_time' : user['login_time'] 
                         }
                         game = user['game']
-                    plat_users.append(search)
+                        plat_users.append(search)
 
                     fix_data = {
                         'game' : game,
