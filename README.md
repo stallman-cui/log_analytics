@@ -1,13 +1,14 @@
 Log Analytics
 =============
 
-*** describe: A simple Online log analytics ***
+describe: A simple Online log analytics
+---------------------------------------
 
-Analytics is a coroutine-based log analysis, synchronous user information and
-payment data system. It powered by gevent.
+#### Analytics is a coroutine-based log analysis, synchronous user information and 
+#### payment data system. It powered by gevent.###
 
 Dependencies
-============
+------------
   - gevent: http://www.gevent.org/
   
   - zmq: http://zeromq.org/
@@ -17,13 +18,13 @@ Dependencies
   - python-etcd: https://github.com/jplana/python-etcd
 
 Deploy
-======
+-----
   [root] ./deploy.sh
   
   service analytics [start|stop|restart]
 
 Module
-======
+------
 -- Spout is the data source node --
 
 -- Bolt is the data process node --
@@ -384,7 +385,7 @@ Module
 	** the Bolt node will update the mongodb respectively, if they need **
 
 Fault Tolerant
-==============
+--------------
 	* store gamelog: before hanle the gamelog data, store the log to disk,
 	  if system is going wrong:
 		  ```shell
@@ -396,7 +397,7 @@ Fault Tolerant
 	* in distribute mode, the etcd service will monitor the system state
 
 Test
-====
+----
 	* test_\read\_payment\_not\_empty, test the payment model can get
 	  payment data from the payment interface
 
