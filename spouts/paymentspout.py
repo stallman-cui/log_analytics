@@ -80,7 +80,7 @@ class PaymentSpout(BaseSpout):
 
     def next_tuple(self):
         self.logger.info('%-10s Starting read the data ...', 'Payment')
-        ts = get_period_ts()
+        ts = get_period_ts(interval='day')
         search = { 
             'start' : ts['start'],
             'end' : ts['end'],

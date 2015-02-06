@@ -109,14 +109,12 @@ class Analytics(Daemon):
         
 if __name__ == "__main__":
     args = option_parser(basedir)
-    print args
     if args.debug == True:
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
     log_config(args.log_file, log_level)
     online_analytics = Analytics(args.pid_file, args.multihost )
-    exit()
     
     control_signal = args.signal
     if control_signal == 'start':
