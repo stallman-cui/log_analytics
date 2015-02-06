@@ -2,12 +2,28 @@ Log Analytics
 =============
 
 *** describe: A simple Online log analytics ***
+Analytics is a coroutine-based log analysis, synchronous user information and
+payment data system. It powered by gevent.
 
+Dependencies
+============
+  - gevent: http://www.gevent.org/
+  - zmq: http://zeromq.org/
+  - etcd: https://github.com/coreos/etcd
+  - python-etcd: https://github.com/jplana/python-etcd
+
+Deploy
+======
+  [root] ./deploy.sh
+  service analytics [start|stop|restart]
+
+Module
+======
 -- Spout is the data source node --
 
 -- Bolt is the data process node --
 
-+ Spout model, the data source node
++ Spout model, the data source node 
 	* gamelog, read the gamelog data
 		- output, for example:
 		```python		
@@ -56,9 +72,27 @@ Log Analytics
 			 }
 		}
 		```
+	* syncuser, get from the orignal game user data
+	  - output, for example:
+		```python
+		each\_user = {
+			'game' : 'wsdx',
+			'area' : '54598574dbdb677b6226a5df',
+		   	'plat' : '1059',
+	   		'ts' : 1423213068,
+			'uid' : '141560631361753593',
+			'name' : 'superman',
+			'grade' : 3,
+			'rest_yuanbao' : 200,
+			'birthday' : 1418637569,
+			'acctid' : kutheso@hotmail.com",
+			'score' : 930,
+			'login_time' : 1418888736
+	    }
+        ```
 
 + Bolt model, the data processing node
-	* login:
+	* loginhour:
 		- input: the output of the gamelog's login_logcount record
 		```python
 		each_gamelog = {
@@ -80,16 +114,32 @@ Log Analytics
 		```
 		- output:
 		```python
-		each_login = {
+		each_loginhour = {
 			'game' : 'dl',
 			'area' : '549140c8dbdb67794fc0fa3b',
 			'plat' : '2001'
+			'ts' : 1420686000,
 			'count' : 1,
 			'userlist' : ['3284681055',],
 			'type' : 'login',
 		}	
 		```
-	* signup
+	* loginday:
+	  - input: the output of the loginhour
+	  - output:
+	  ```python
+	  each_loginday = {
+		  'game' : 'dl',
+		  'area' : '549140c8dbdb67794fc0fa3b',
+		  'plat' : '2001'
+		  'ts' : 1420646400,
+		  'count' : 1,
+		  'userlist' : ['3284681055',],
+		  'type' : 'login',
+	  }
+      ```
+
+	* signuphour
 		- input: the output of the gamelog's signup_logcount record
 		```python
 		each_gamelog = {
@@ -112,7 +162,7 @@ Log Analytics
 
 		- output:
 		```python
-		each_signup = {
+		each_signuphour = {
 			'game' : 'dl',
 			'area' : '549140c8dbdb67794fc0fa3b',
 			'plat' : '2001'
@@ -121,7 +171,12 @@ Log Analytics
 			'type' : 'signup',
 		}	
 		```
-	* createrole
+	* signupday
+	  - input: the output of the signuphour
+	  
+	  - output: just like login, the different with signuphour is ts
+	  
+	* createrolehour
 		- input: the output of the gamelog's createrole record
 		```python
 		each_gamelog = {
@@ -153,9 +208,9 @@ Log Analytics
 			'type' : 'createrole',
 		}	
 		```
-	
-
-	* payorderuser
+	* createroleday
+	  
+	* paysummary
 		- input:  the output of the payment
 		```python
 	    each_payment = {
@@ -217,8 +272,73 @@ Log Analytics
 			'pay_amout' : 113
 		}
 		```
+
+	* activeday(timer bolt)
+	  - input: read the mongodb's collections server, get the data of today
+	  - output:
+		```python
+		each\_day = {
+			'game' : 'wsdx',
+			'area' : '5461bb1bec8b9c686a8b4576',
+			'plat' : '1059',
+			'ts' : 1420646400,
+			'ac\_user' : 214,
+			'new\_ac\_user' : 109,
+			'new\_ac\_rate' : 50.93,
+			'old\_ac\_user' : 105,
+			'old\_ac\_rate' : 49.07,
+	    }
+	    ```
+	* activeweek(timer bolt)
+	
+	* activemonth(timer bolt)
+
+	* serverstarttime(timer bolt)
+
+	* coinhour
+	  statistics the user comsumed yuanbao
+
+	* coinday
+
+	* cointype
+	  statistics the user comsumed yuanbao type
+
+	* gamecopy
+	  statistics the fuben_logchange
+
+	* loginretention
+	  statistics the user login retention
+
+	* mainline
+	  statistics the trunk\_task\_accept and trunk\_task\_finish
+
+	* payorderdetail
+	  statictis the every payorder 
+
+	* paytraceday
+	  statistics the payment retention
+
+	* shop
+	  statistics the user buyed items
+
+	* userpay
+	  statistics the user payment info, and yuanbao data
+
+	* usercenter
+	  store the user data from remote
+
+	* userlevel
+	  statistics the user level distributed
+
++ Message tuples transfer
+	*** 1. Every spout publish the message tuple with it's state,
+		and most of bolts subscribe message tuple they interested.
 		
-+ Message tuples transfer 
+		2. Timer bolt is special, will read the data from mongodb, and it will
+		   pushlish the message tuple if necessary.
+	***
+	Some Exaples:
+	
 	* Sender, Publish all the message tuples
 		- input: read message tuple from the Queue()
 
@@ -229,6 +349,7 @@ Log Analytics
 		- input: read the message tuple with 'tcp://127.0.0.1:5000'
 
 		- output: put received message tuple into the Queue()
+
 
 	* Gamelog Spout, generate gamelog message tuple to Receiver
 
@@ -249,11 +370,24 @@ Log Analytics
 	* Server Bolt, Read the login, signup, createrole, payorderuser
 	  message tuple from Sender, and send the processed message tuple
 	  to the Receiver
+	
 
 	** the Bolt node will update the mongodb respectively, if they need **
 
-+ Test 
+Fault Tolerant
+==============
+	* store gamelog: before hanle the gamelog data, store the log to disk,
+	  if system is going wrong:
+		  ```shell
+		  cat data/gamelog_201502061738.txt | ./bin/read_stdin_gamelog
+		  ```
+	* filter bolt: to void count repeat data, ignore the repeat record,
+	  just handle the effective message tuple
 
+	* in distribute mode, the etcd service will monitor the system state
+
+Test
+====
 	* test_\read\_payment\_not\_empty, test the payment model can get
 	  payment data from the payment interface
 

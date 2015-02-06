@@ -10,14 +10,15 @@ PID_FILE=$BASE_DIR/analytics.pid
 SSH_USER=mhgame
 
 _start() {
-    sudo -u $SSH_USER $COMMAND -l $LOG_FILE -c $CONFIG_FILE -p $PID_FILE -s 'start'
     echo 'start: ', $COMMAND
+    sudo -u $SSH_USER $COMMAND -l $LOG_FILE -c $CONFIG_FILE -p $PID_FILE -s 'start'
 }
 
 _stop() {
+    echo 'Stop: ', $COMMAND
     $COMMAND -s 'stop'
     ps -ef | grep analytics | grep -v grep | awk '{print $2}' | xargs kill
-    echo 'Stop: ', $COMMAND
+
 }
 
 _status() {

@@ -6,6 +6,7 @@ topology_file = os.path.join(config_dir, 'topology.etc')
 ssh_user = 'mhgame'
 send_addr = 'tcp://127.0.0.1:5001'
 receive_addr = 'tcp://127.0.0.1:5000'
+payment_addr = 'https://pay.millionhero.com'
 
 PUBTITLE = {
     # gamelog's op.code

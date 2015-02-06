@@ -6,6 +6,7 @@ import json
 import cStringIO
 
 from configs.config import DB_CONN as db_config
+from configs.config import payment_addr
 from spouts.basespout import BaseSpout
 from models.paymentmodel import PaymentModel
 from analyticslib.lib import get_period_ts
@@ -24,7 +25,7 @@ class PaymentSpout(BaseSpout):
         buf = cStringIO.StringIO()
         self.__ch.setopt(pycurl.WRITEFUNCTION, buf.write)
         #print 'param: ', json.dumps(param, indent=3)
-        host = 'https://pay.millionhero.com'
+        host = payment_addr
         ts = str(int(time.time()))
         sign = hashlib.md5(url + ts + self.__secret ).hexdigest()
         url = '{0}{1}?ts={2}&sign={3}&{4}'.format(host, url, ts, sign, urllib.urlencode(query))
