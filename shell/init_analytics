@@ -1,15 +1,16 @@
 #!/bin/bash
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-$BASE_DIR=/home/cui/log_analytics
+BASE_DIR=/home/cui/log_analytics
 BIN_DIR=$BASE_DIR/bin
-COMMAND=$BIN_DIR/analytics.py
+COMMAND=$BIN_DIR/analytics
 LOG_FILE=$BASE_DIR/log/online.log
 CONFIG_FILE=$BASE_DIR/configs/config.py
 PID_FILE=$BASE_DIR/analytics.pid
+SSH_USER=mhgame
 
 _start() {
-    $COMMAND -l $LOG_FILE -c $CONFIG_FILE -p $PID_FILE -s 'start'
+    sudo -u $SSH_USER $COMMAND -l $LOG_FILE -c $CONFIG_FILE -p $PID_FILE -s 'start'
     echo 'start: ', $COMMAND
 }
 

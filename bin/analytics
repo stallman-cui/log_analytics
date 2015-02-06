@@ -25,7 +25,7 @@ from allmodel import bolt_timer_models
 from allmodel import all_spouts
 
 class Analytics(Daemon):
-    def __init__(self, pidfile):
+    def __init__(self, pidfile, distribute):
         Daemon.__init__(self, pidfile)
         self.logger = logging.getLogger('online_analytics')
         self.pidfile = pidfile
@@ -114,9 +114,9 @@ if __name__ == "__main__":
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
-        
     log_config(args.log_file, log_level)
-    online_analytics = Analytics(args.pid_file)
+    online_analytics = Analytics(args.pid_file, args.multihost )
+    exit()
     
     control_signal = args.signal
     if control_signal == 'start':

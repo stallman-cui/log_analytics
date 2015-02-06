@@ -1,4 +1,6 @@
-import sys, os, time, atexit
+import sys
+import os
+import time
 from signal import SIGTERM
 
 from worker import Worker
@@ -9,13 +11,14 @@ class Daemon(object):
     A generic daemon class.
     Usage: subclass the Daemon class and override the run() method
     """
-    def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+    def __init__(self, pidfile, distribute=False, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
         self.topology = Topology()
         self.worker = Worker()
+        self.distribute = distribute
 
     def daemonize(self):
         '''
@@ -75,8 +78,9 @@ class Daemon(object):
             sys.exit(1)
         
         self.daemonize()
-        self.topology.create_topology('online')
-        self.worker.register(int(file(self.pidfile, 'r').read().strip()))
+        if self.distribute:
+            self.topology.create_topology('online')
+            self.worker.register(int(file(self.pidfile, 'r').read().strip()))
         self.run()
 
     def stop(self):
@@ -91,7 +95,8 @@ class Daemon(object):
             message = 'pidfile %s does not exist. Daemon not running?\n'
             sys.stderr.write(message % self.pidfile)
             return
-        self.worker.unregister(pid)
+        if self.distribute:
+            self.worker.unregister(pid)
         try:
             while True:
                 os.kill(pid, SIGTERM)

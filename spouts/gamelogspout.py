@@ -6,7 +6,7 @@ from spouts.basespout import BaseSpout
 from models.gamelogmodel import GamelogModel
 from models.hostmodel import HostModel
 from configs.config import ssh_user
-from lib import *
+from analyticslib.lib import *
 
 class GamelogSpout(BaseSpout):
     """ read the gamelog data,
@@ -48,22 +48,27 @@ class GamelogSpout(BaseSpout):
             )
             for line in  ssh.stdout.readlines():
                 f.write(str(line))
-                line = gamelog_parse(line)
-                if line:
-                    line = gamelog_filter(line)
-                    if line:
-                        line['game'] = areas[line['area']]
-                        message_tuple = {
-                            'body' : line,
-                            'state' : self.conf['state']
-                        }
-                        self.count += 1
-                        self.socket.send_json(message_tuple)
-                        ack_no = self.socket.recv_string()
-                        if ack_no != 'Error':
-                            self.ack(ack_no)
-                        else:
-                            self.fail(ack_no)
         f.close()
+        try:
+            with open(out_file, 'r') as f:
+                for line in f:
+                    line = gamelog_parse(line)
+                    if line:
+                        line = gamelog_filter(line)
+                        if line:
+                            line['game'] = areas[line['area']]
+                            message_tuple = {
+                                'body' : line,
+                                'state' : self.conf['state']
+                            }
+                            self.count += 1
+                            self.socket.send_json(message_tuple)
+                            ack_no = self.socket.recv_string()
+                            if ack_no != 'Error':
+                                self.ack(ack_no)
+                            else:
+                                self.fail(ack_no)
+        except IOError as e:
+            self.logger.error('Gamelog read Error: %s', str(e))
             
         self.logger.info('%-10s End the read data ...', 'Gamelog')
