@@ -6,6 +6,7 @@ import zmq.green as zmq
 from gevent.queue import Queue
 
 from configs.config import PUBTITLE
+from configs.config import send_addr, receive_addr
 
 class Transfer():
     MAX = 999999
@@ -20,7 +21,7 @@ class Transfer():
     # Publish all the messages
     def sender(self):
         send_socket = self.context.socket(zmq.PUB)
-        send_socket.bind("tcp://127.0.0.1:5001")
+        send_socket.bind(send_addr)
         while True:
             if not self.messages.empty():
                 message_tuple = self.messages.get_nowait()
@@ -40,7 +41,7 @@ class Transfer():
     # Collect all the messages        
     def receiver(self):
         server_socket = self.context.socket(zmq.REP)
-        server_socket.bind("tcp://127.0.0.1:5000")
+        server_socket.bind(receive_addr)
         while True:
             message_tuple = server_socket.recv_json()
             if not message_tuple.get('id', 0):

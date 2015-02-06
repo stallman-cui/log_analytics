@@ -4,6 +4,8 @@ import os
 config_dir = os.path.dirname(os.path.abspath(__file__))
 topology_file = os.path.join(config_dir, 'topology.etc')
 ssh_user = 'mhgame'
+send_addr = 'tcp://127.0.0.1:5001'
+receive_addr = 'tcp://127.0.0.1:5000'
 
 PUBTITLE = {
     # gamelog's op.code
