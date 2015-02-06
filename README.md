@@ -2,19 +2,24 @@ Log Analytics
 =============
 
 *** describe: A simple Online log analytics ***
+
 Analytics is a coroutine-based log analysis, synchronous user information and
 payment data system. It powered by gevent.
 
 Dependencies
 ============
   - gevent: http://www.gevent.org/
+  
   - zmq: http://zeromq.org/
+  
   - etcd: https://github.com/coreos/etcd
+  
   - python-etcd: https://github.com/jplana/python-etcd
 
 Deploy
 ======
   [root] ./deploy.sh
+  
   service analytics [start|stop|restart]
 
 Module
@@ -331,10 +336,14 @@ Module
 	  statistics the user level distributed
 
 + Message tuples transfer
-	*** 1. Every spout publish the message tuple with it's state,
+
+	***
+		1. Every spout publish the message tuple with it's state,
+		
 		and most of bolts subscribe message tuple they interested.
 		
 		2. Timer bolt is special, will read the data from mongodb, and it will
+		
 		   pushlish the message tuple if necessary.
 	***
 	Some Exaples:
