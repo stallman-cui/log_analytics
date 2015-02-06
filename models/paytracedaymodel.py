@@ -2,7 +2,7 @@ from common.mongo import MongoModel
 from models.createroledaymodel import CreateroleDayModel
 from models.paysummarymodel import PaySummaryModel
 from configs.config import END_TOPO_SUCCESS
-from lib import get_ts
+from analyticslib.lib import get_ts
 
 class PayTraceDayModel(MongoModel):
     def __init__(self):

@@ -3,7 +3,7 @@ import time
 from common.mongo import MongoModel
 from models.servermodel import ServerModel
 from configs.config import END_TOPO_SUCCESS
-from lib import get_ts
+from analyticslib.lib import get_ts
 
 class ActiveDayModel(MongoModel):
     timer = 60 * 60 * 24
@@ -19,11 +19,11 @@ class ActiveDayModel(MongoModel):
 
     def handle(self):
         server = ServerModel()
-        now = int(time.time())
-        yesterday = now - 3600 * 24
-        for ts in [now, yesterday]:
+        today = get_ts(int(time.time()), interval='day')
+        yesterday = today - 3600 * 24
+        for ts in [today, yesterday]:
             search = {
-                'ts' : get_ts(ts, interval='day')
+                'ts' : ts
             }
             result = server.get_list(search)
             for each_server in result:

@@ -4,7 +4,7 @@ from spouts.basespout import BaseSpout
 from models.syncusermodel import SyncUserModel
 from models.accountlistmodel import AccountListModel
 from models.accountusermodel import AccountUserModel
-from lib import *
+from analyticslib.lib import *
 
 class SyncUserSpout(BaseSpout):
     timer = 3600

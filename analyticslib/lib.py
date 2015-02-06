@@ -15,7 +15,8 @@ opnode = ['login_logcount', 'signup_logcount', 'createrole_logcount',
 precise_format = '%Y-%m-%d %H:%M:%S'
 hour_format = '%Y-%m-%d %H:00:00'
 day_format = '%Y-%m-%d'
-basedir, bin = os.path.split(__file__)
+basedir, bin = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+area_file = os.path.join(basedir, 'game_area_plat.json')
 
 def gamelog_parse(line):
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
@@ -70,10 +71,12 @@ def get_period_ts(time_str='', interval='hour'):
     }
     return ts
     
-def log_config():
-    log_file = os.path.join(basedir, 'online.log')
-    #level = logging.INFO
-    level = logging.DEBUG
+def log_config(log_file, log_level):
+    log_dir = os.path.dirname(log_file)
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+
+    level = log_level
     logger = logging.getLogger('online_analytics')
     logger.setLevel(level)
     
@@ -107,11 +110,11 @@ def set_game_area_plat():
         'area' : game_area,
         'plat' : plat_id_name
     }
-    with open(os.path.join(basedir, 'game_area_plat.json'), 'w') as f:
+    with open(area_file, 'w') as f:
         json.dump(game_area_plat, f)
 
 def get_game_area_plat():
-    with open(os.path.join(basedir, 'game_area_plat.json'), 'r') as f:
+    with open(area_file, 'r') as f:
         game_area_plat = json.load(f)
         return game_area_plat
 

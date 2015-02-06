@@ -7,12 +7,16 @@ import os
 import time
 import multiprocessing
 import gevent
+
 basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 sys.path.insert(0, basedir)
 
-from models.daemon import Daemon
-from transfer import Transfer
-from worker import Worker
+from analyticslib.daemon import Daemon
+from analyticslib.transfer import Transfer
+from analyticslib.client import option_parser
+from analyticslib.worker import Worker
+from analyticslib.lib import log_config
+
 from bolts.basebolt import BaseBolt
 from bolts.timerbolt import TimerBolt
 from allmodel import bolt_models_1
@@ -20,10 +24,9 @@ from allmodel import bolt_models_2
 from allmodel import bolt_timer_models
 from allmodel import all_spouts
 
-####class Analytics(Daemon):
-class Analytics():
+class Analytics(Daemon):
     def __init__(self, pidfile):
-        ####Daemon.__init__(self, pidfile)
+        Daemon.__init__(self, pidfile)
         self.logger = logging.getLogger('online_analytics')
         self.pidfile = pidfile
         self.transfer = Transfer()
@@ -105,19 +108,22 @@ class Analytics():
         spout_process.start()
         
 if __name__ == "__main__":
-    log_file = os.path.join(basedir, 'log.pid')
-    online_analytics = Analytics(log_file)
-    online_analytics.run()
-    if len(sys.argv) == 2:
-        if 'start' == sys.argv[1]:
-            online_analytics.start()
-        elif 'stop' == sys.argv[1]:
-            online_analytics.stop()
-        elif 'restart' == sys.argv[1]:
-            online_analytics.restart()
-        else:
-            print('Unknown command')
-            sys.exit(2)
+    args = option_parser(basedir)
+    print args
+    if args.debug == True:
+        log_level = logging.DEBUG
     else:
-        print('Usage: %s start|stop|restart' % sys.argv[0])
-        sys.exit(2)
+        log_level = logging.INFO
+        
+    log_config(args.log_file, log_level)
+    online_analytics = Analytics(args.pid_file)
+    
+    control_signal = args.signal
+    if control_signal == 'start':
+        online_analytics.start()
+    elif control_signal == 'stop':
+        online_analytics.stop()
+    elif control_signal == 'restart':
+        online_analytics.restart()
+    else:
+        print('unkown control_signal: [start|stop|restart]')

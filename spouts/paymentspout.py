@@ -8,7 +8,7 @@ import cStringIO
 from configs.config import DB_CONN as db_config
 from spouts.basespout import BaseSpout
 from models.paymentmodel import PaymentModel
-from lib import get_period_ts
+from analyticslib.lib import get_period_ts
 
 class PaymentSpout(BaseSpout):
     timer = 300
@@ -80,8 +80,7 @@ class PaymentSpout(BaseSpout):
 
     def next_tuple(self):
         self.logger.info('%-10s Starting read the data ...', 'Payment')
-        #ts = get_period_ts()
-        ts = {'start': 1420646400, 'end':1420732799}
+        ts = get_period_ts()
         search = { 
             'start' : ts['start'],
             'end' : ts['end'],

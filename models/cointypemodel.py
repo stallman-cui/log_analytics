@@ -1,5 +1,5 @@
 from common.mongo import MongoModel
-from lib import get_ts
+from analyticslib.lib import get_ts
 
 class CoinTypeModel(MongoModel):
     def get_db(self):

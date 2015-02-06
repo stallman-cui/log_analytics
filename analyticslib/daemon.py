@@ -1,8 +1,8 @@
 import sys, os, time, atexit
 from signal import SIGTERM
 
-from analyticslib.lib.worker import Worker
-from analyticslib.lib.topology import Topology
+from worker import Worker
+from topology import Topology
 
 class Daemon(object):
     """
@@ -54,7 +54,7 @@ class Daemon(object):
         os.dup2(se.fileno(), sys.stderr.fileno())
 
         # write pidfile
-        atexit.register(self.delpid)
+        #atexit.register(self.delpid)
         pid = str(os.getpid())
         file(self.pidfile, 'w+').write('%s\n' % pid)
 

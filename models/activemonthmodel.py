@@ -5,7 +5,7 @@ from models.areamodel import AreaModel
 from models.logindaymodel import LoginDayModel
 from models.serverstarttimemodel import ServerStartTimeModel
 from configs.config import END_TOPO_SUCCESS
-from lib import *
+from analyticslib.lib import *
 
 class ActiveMonthModel(MongoModel):
     timer = 60 * 60 * 24 * 30

@@ -1,5 +1,5 @@
 from common.mongo import MongoModel
-from lib import get_ts
+from analyticslib.lib import get_ts
 
 class ShopFilterModel(MongoModel):
     def get_db(self):
@@ -21,6 +21,7 @@ class ShopFilterModel(MongoModel):
     def handle(self, recv_body):
         if recv_body:
             try:
+                game = recv_body['game']
                 area = recv_body['area']
                 plat_arr = recv_body['data']['URS'].split('_')
                 ts = recv_body['ts']
@@ -52,6 +53,7 @@ class ShopFilterModel(MongoModel):
                 else:
                     return
             else:
+                search['game'] = game
                 search['userlist'] = [acctid, ]
                 search['filterlist'] = [record_key, ]
                 self.insert(search)

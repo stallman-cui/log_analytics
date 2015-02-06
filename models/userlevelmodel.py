@@ -4,7 +4,7 @@ from common.mongo import MongoModel
 from models.usercentermodel import UserCenterModel
 from models.combatmodel import CombatModel
 from configs.config import END_TOPO_SUCCESS
-from lib import *
+from analyticslib.lib import *
 
 class UserLevelModel(MongoModel):
     timer = 60 * 60 * 24

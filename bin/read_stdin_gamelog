@@ -7,7 +7,7 @@ import os
 basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 sys.path.insert(0, basedir)
 
-from lib import gamelog_parse, gamelog_filter
+from analyticslib.lib import gamelog_parse, gamelog_filter
 
 class GamelogCmd():
     """ read the gamelog data,

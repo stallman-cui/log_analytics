@@ -1,7 +1,7 @@
 from common.mongo import MongoModel
 from models.logindaymodel import LoginDayModel
 from configs.config import END_TOPO_SUCCESS
-from lib import *
+from analyticslib.lib import *
 
 class ServerStartTimeModel(MongoModel):
     timer = 60 * 60

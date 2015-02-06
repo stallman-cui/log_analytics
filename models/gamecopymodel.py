@@ -1,5 +1,5 @@
 from common.mongo import MongoModel
-from lib import get_ts
+from analyticslib.lib import get_ts
 from configs.config import END_TOPO_SUCCESS
 
 class GameCopyModel(MongoModel):

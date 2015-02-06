@@ -1,6 +1,6 @@
 from common.mongo import MongoModel
 from models.usercentermodel import UserCenterModel
-from lib import get_ts, get_game_area_plat
+from analyticslib.lib import get_ts, get_game_area_plat
 from configs.config import END_TOPO_SUCCESS
 
 class UserPayModel(MongoModel):
