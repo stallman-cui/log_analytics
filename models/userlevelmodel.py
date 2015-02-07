@@ -7,7 +7,7 @@ from configs.config import END_TOPO_SUCCESS
 from analyticslib.lib import *
 
 class UserLevelModel(MongoModel):
-    timer = 60 * 60 * 24
+    timer = 60 * 60 * 2
 
     def get_db(self):
         return 'analytics'

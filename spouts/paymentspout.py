@@ -9,10 +9,10 @@ from configs.config import DB_CONN as db_config
 from configs.config import payment_addr
 from spouts.basespout import BaseSpout
 from models.paymentmodel import PaymentModel
-from analyticslib.lib import get_period_ts
+from analyticslib.lib import get_period_ts, get_ts
 
 class PaymentSpout(BaseSpout):
-    timer = 300
+    timer = 60 * 60
     
     def __init__(self):
         BaseSpout.__init__(self, model=PaymentModel)
@@ -20,6 +20,7 @@ class PaymentSpout(BaseSpout):
         self.__ch.setopt(pycurl.CONNECTTIMEOUT, 5)
         self.__ch.setopt(pycurl.FOLLOWLOCATION, True)
         self.__secret = db_config['ghoko']['secret']
+        self.__state = get_ts(int(time.time()), interval='day')
 
     def call(self, url, query = {}, param = {}):
         buf = cStringIO.StringIO()
@@ -81,20 +82,36 @@ class PaymentSpout(BaseSpout):
 
     def next_tuple(self):
         self.logger.info('%-10s Starting read the data ...', 'Payment')
+        search_list = []
         ts = get_period_ts(interval='day')
         search = { 
             'start' : ts['start'],
             'end' : ts['end'],
             'page.index' : -1
         }
-        data = self.get_user_payment_list(search)
-        if data['status'] != 500:
-            try:
-                pmresult = json.loads(data['body'])
-            except ValueError as e:
-                self.logger.error('ValueError: %s', str(e))
+        search_list.append(search)
+        diff = ts['start'] - self.__state
+        if diff >= 3600 * 24:
+            yes_search = {
+                'start' : self.__state,
+                'end' : self.__state + 3600 * 24 - 1,
+                'page.index' : -1
+                
+            }
+            self.__state = ts['start']
+            search_list.append(yes_search)
+        
+        for each_search in search_list:
+            self.logger.debug('search: %s', each_search)
+            data = self.get_user_payment_list(each_search)
+            if data['status'] != 500:
+                try:
+                    pmresult = json.loads(data['body'])
+                except ValueError as e:
+                    self.logger.error('ValueError: %s', str(e))
+                    return
+            else:
                 return
-
             user_pay_list = {}
             game_info = {}
             for d in pmresult:
@@ -104,7 +121,6 @@ class PaymentSpout(BaseSpout):
                 if not area in game_info.keys():
                     if not game in user_pay_list.keys():
                         user_pay_list[game] = {}
-
                     user_pay_list[game][area] = {
                         plat : {
                             d['user'] : {
