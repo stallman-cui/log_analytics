@@ -7,17 +7,16 @@ import os
 basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
 sys.path.insert(0, basedir)
 
-from analyticslib.lib import gamelog_parse, gamelog_filter
+from analyticslib.lib import *
 
 class GamelogCmd():
     """ read the gamelog data,
     and send it
     """
-    MAX = 999999
-    message_id = 0
-
     def __init__(self):
         self.open()
+        set_game_area_plat()
+        self.areas = get_game_area_plat()['area']
 
     def open(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is initialized '''
@@ -33,17 +32,16 @@ class GamelogCmd():
         if line:
             line = gamelog_filter(line)
             if line:
+                line['game'] = self.areas[line['area']]
                 message_tuple = {
-                    'id' : GamelogCmd.message_id % GamelogCmd.MAX,
                     'body' : line,
                     'state' : "gamelog"
                 }
-                GamelogCmd.message_id += 1
                 print message_tuple
                 #sys.exit(0)
                 self.socket.send_json(message_tuple)
                 ack_no = self.socket.recv_string()
-                if ack_no == str(message_tuple['id']):
+                if ack_no != 'Error':
                     self.ack(ack_no)
                 else:
                     self.fail(ack_no)
