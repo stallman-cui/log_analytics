@@ -15,7 +15,7 @@ class GamelogCmd():
     """
     def __init__(self):
         self.open()
-        set_game_area_plat()
+        #set_game_area_plat()
         self.areas = get_game_area_plat()['area']
 
     def open(self, conf='', topology_context='', output_collector=''):
