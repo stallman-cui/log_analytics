@@ -44,6 +44,7 @@ class ShopFilterModel(MongoModel):
             result = self.get_one(search)
             if result:
                 search['filterlist'] = result['filterlist']
+                search['userlist'] = result['userlist']
                 if record_key not in result['filterlist']:
                     search['filterlist'].append(record_key)
                     if acctid not in result['userlist']:

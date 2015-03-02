@@ -22,7 +22,10 @@ class GamelogSpout(BaseSpout):
         self.logger.info('%-10s Starting read the data ...', 'Gamelog')
         basedir, bin = os.path.split(os.path.dirname(os.path.abspath(__file__)))
         data_dir = os.path.join(basedir, 'data')
-        out_file = os.path.join(data_dir, 'gamelog_' + time.strftime('%Y%m%d%H%M', time.localtime()) + '.txt')
+        FORMAT = '%Y%m%d%H%M'
+        time_now = time.strftime(FORMAT, time.localtime())
+        time_stamp = (int(time.mktime(time.strptime(time_now, FORMAT))) / 300 - 1) * 300
+        out_file = os.path.join(data_dir, 'gamelog_' + time.strftime('%Y%m%d%H%M', time.localtime(time_stamp)) + '.txt')
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
 
@@ -59,7 +62,7 @@ class GamelogSpout(BaseSpout):
                             line['game'] = areas[line['area']]
                             message_tuple = {
                                 'body' : line,
-                                'state' : self.conf['state']
+                                'state' : line['op']['code']
                             }
                             self.count += 1
                             self.socket.send_json(message_tuple)

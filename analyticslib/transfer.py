@@ -25,13 +25,7 @@ class Transfer():
         while True:
             if not self.messages.empty():
                 message_tuple = self.messages.get_nowait()
-                if message_tuple['state'] == 'gamelog':
-                    try:
-                        topic = PUBTITLE[message_tuple['body']['op']['code']]
-                    except:
-                        continue
-                else:
-                    topic = PUBTITLE[message_tuple['state']]
+                topic = PUBTITLE[message_tuple['state']]
                 send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
             else:
                 gevent.sleep(1)
