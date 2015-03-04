@@ -41,45 +41,38 @@ class UserPayModel(MongoModel):
 
             plat = str(plat_arr[len(plat_arr) -2])
             plat_name = get_game_area_plat()['plat'][plat]
-            amount = yuanbao_amount / 10
-            used_yuanbao = 0
-            if yuanbao_amount < 0:
-                used_yuanbao = -yuanbao_amount
-
             search = {
                 'area' : area,
                 'plat' : plat,
-                'ts' : get_ts(ts, interval=3),
+                'ts' : get_ts(ts, interval='day'),
                 'uid' : uid
             }
             result = self.get_one(search)
 
-            user_search = {
-                'area' : area,
-                'uid' : uid
-            }
-            user_result = self.ucmodel.get_one(user_search)
-            if user_result:
-                search['rest_yuanbao'] = user_result['rest_yuanbao']
-                search['reg_time'] = user_result['birthday']
-                search['recent_login'] = user_result['login_time']
-
-            if result:
-                search['count'] = result['count'] + 1
-                search['yuanbao'] = result['yuanbao'] + yuanbao_amount
-                search['amount'] = result['amount'] + amount
-                search['used_yuanbao'] = result['used_yuanbao'] + used_yuanbao
-                mid = str(result['_id'])
-                self.update(mid, search)
+            if not recv_body['data']['extra'].get('reqstr', 0):
+                ## consume record, used_yuanbao
+                if yuanbao_amount > 0:
+                    return
+                if result:
+                    search['used_yuanbao'] = abs(yuanbao_amount)
+                    if result.get('used_yuanbao', 0):
+                        search['used_yuanbao'] += result['used_yuanbao']
+                    mid = str(result['_id'])
+                    self.update(mid, search)
+                else:
+                    search['used_yuanbao'] = abs(yuanbao_amount)
+                    self.insert(search)
             else:
-                search['game'] = game
-                search['Grade'] = grade
-                search['Name'] = name
-                search['platname'] = plat_name
-                search['count'] = 1
-                search['yuanbao'] = yuanbao_amount
-                search['amount'] = amount
-                search['used_yuanbao'] = used_yuanbao
+                ## charge record, count, yuanbao, amount
+                user_search = {
+                    'area' : area,
+                    'uid' : uid
+                }
+                user_result = self.ucmodel.get_one(user_search)
+                if user_result:
+                    search['rest_yuanbao'] = user_result['rest_yuanbao']
+                    search['reg_time'] = user_result['birthday']
+                    search['recent_login'] = user_result['login_time']
                 first_search = {
                     'area' : area,
                     'plat' : plat,
@@ -93,7 +86,28 @@ class UserPayModel(MongoModel):
                     search['firstPayGrade'] = first_result['firstPayGrade']
                 else:
                     search['firstPayGrade'] = grade
-                    
-                self.insert(search)
+                if result:
+                    search['game'] = game
+                    search['grade'] = grade
+                    search['name'] = name
+                    search['platname'] = plat_name
+                    search['count'] = 1
+                    search['yuanbao'] = yuanbao_amount
+                    search['amout'] = yuanbao_amount / 10
+                    if result.get('count', 0):
+                        search['count'] += result['count']
+                        search['yuanbao'] += result['yuanbao']
+                        search['amout'] += result['amout']
+                    mid = str(result['_id'])
+                    self.update(mid, search)
+                else:
+                    search['game'] = game
+                    search['grade'] = grade
+                    search['name'] = name
+                    search['platname'] = plat_name
+                    search['count'] = 1
+                    search['yuanbao'] = yuanbao_amount
+                    search['amout'] = yuanbao_amount / 10
+                    self.insert(search)
             
             return END_TOPO_SUCCESS

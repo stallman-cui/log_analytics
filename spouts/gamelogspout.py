@@ -12,7 +12,7 @@ class GamelogSpout(BaseSpout):
     """ read the gamelog data,
     and send it
     """
-    timer = 300
+    timer = 240
     
     def __init__(self):
         BaseSpout.__init__(self, model=GamelogModel)

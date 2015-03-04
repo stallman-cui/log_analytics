@@ -11,7 +11,7 @@ class CoinDayModel(MongoModel):
 
     def get_conf(self):
         conf = {
-            'sub_conf' : ['cointype'],
+            'sub_conf' : ['coinfilter'],
             'state' : 'coin'
         }
         return conf
@@ -21,12 +21,18 @@ class CoinDayModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
-            game = recv_body['game']
-            area = recv_body['area']
-            plat = recv_body['plat']
-            ts = recv_body['ts']
-            coin = recv_body['coin']
-                
+            try:
+                game = recv_body['game']
+                area = recv_body['area']
+                plat_arr = recv_body['data']['URS'].split('_')
+                ts = recv_body['ts']
+                coin = abs(recv_body['data']['amount'])
+            except KeyError as e:
+                print 'Key error: ', str(e)
+                print recv_body
+                return
+
+            plat = str(plat_arr[len(plat_arr) -2])                
             search = {
                 'area' : area,
                 'plat' : plat,
@@ -34,12 +40,12 @@ class CoinDayModel(MongoModel):
             }
             __id = self.get_one(search)
             search['coin'] = coin
-            search['game'] = game
             if __id:
                 mid = str(__id['_id'])
                 search['coin'] += __id['coin']
                 self.update(mid, search)
             else:
+                search['game'] = game
                 self.insert(search)
 
         return END_TOPO_SUCCESS

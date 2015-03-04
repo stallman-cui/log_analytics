@@ -9,7 +9,7 @@ class UserPayFilterModel(MongoModel):
         return 'user_pay_user_list'
 
     def get_keys(self):
-        return 'area','plat', 'uid'
+        return 'area','plat', 'uid', 'ts'
 
     def get_conf(self):
         conf = {
@@ -20,31 +20,36 @@ class UserPayFilterModel(MongoModel):
 
     def handle(self, recv_body):
         if recv_body:
-            if not recv_body['data']['extra'].get('reqstr', 0):
-                return
             try:
                 area = recv_body['area']
-                plat = str(recv_body['data']['CorpId'])
-                orderid = recv_body['data']['extra']['reqstr']
+                plat_arr = recv_body['data']['URS'].split('_')
                 ts = recv_body['ts']
+                new = str(recv_body['data']['extra']['new_yuanbao'])
+                old = str(recv_body['data']['extra']['old_yuanbao'])
+                uid = str(recv_body['data']['Uid'])
             except KeyError as e:
                 print 'Key error: ', str(e)
                 return
 
+            plat = str(plat_arr[len(plat_arr) -2])
+            record_key = '_'.join([str(ts), new, old])
             search = {
                 'area' : area,
                 'plat' : plat,
-                'ts' : get_ts(ts, interval=3),
+                'uid' : uid,
+                'ts' : get_ts(ts, interval='day'),
             }
             result = self.get_one(search, {'userlist':1})
-            record_key = '_'.join([str(ts), str(orderid)])
             if result:
                 search['userlist'] = result['userlist']
                 if record_key not in result['userlist']:
                     search['userlist'].append(record_key)
+                    mid = str(result['_id'])
+                    self.update(mid, search)
                 else:
                     return
             else:
                 search['userlist'] = [record_key, ]
+                self.insert(search)
 
             return recv_body
