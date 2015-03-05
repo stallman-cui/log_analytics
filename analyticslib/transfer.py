@@ -27,6 +27,7 @@ class Transfer():
                 message_tuple = self.messages.get_nowait()
                 topic = PUBTITLE[message_tuple['state']]
                 send_socket.send("%s %s" % (topic, json.dumps(message_tuple)))
+                gevent.sleep(0.005)
             else:
                 gevent.sleep(1)
                 #self.logger.info('messages queue is empty, may be all the request is done or not start')

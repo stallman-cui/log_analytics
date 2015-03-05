@@ -40,7 +40,6 @@ class UserPayFilterModel(MongoModel):
                 'ts' : get_ts(ts, interval='day'),
             }
             result = self.get_one(search, {'userlist':1})
-            ts = get_ts(ts, interval='day')
             if result:
                 search['userlist'] = result['userlist']
                 if record_key not in result['userlist']:
