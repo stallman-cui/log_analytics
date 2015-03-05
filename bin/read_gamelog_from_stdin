@@ -17,6 +17,7 @@ class GamelogCmd():
         self.open()
         #set_game_area_plat()
         self.areas = get_game_area_plat()['area']
+        self.count = 0
 
     def open(self, conf='', topology_context='', output_collector=''):
         ''' Called when a task for this component is initialized '''
@@ -35,10 +36,9 @@ class GamelogCmd():
                 line['game'] = self.areas[line['area']]
                 message_tuple = {
                     'body' : line,
-                    'state' : "gamelog"
+                    'state' : line['op']['code']
                 }
-                print message_tuple
-                #sys.exit(0)
+                self.count += 1
                 self.socket.send_json(message_tuple)
                 ack_no = self.socket.recv_string()
                 if ack_no != 'Error':
@@ -49,16 +49,16 @@ class GamelogCmd():
     def ack(self, msg_id):
         ''' The tuple emiited by this spout with the msg_id has been fully processed. '''
         #print("Gamelog: request was Sucessed, messsage_id: %d \n" % int(msg_id))
+        print '.',
 
     def fail(self, msg_id):
         ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
-
         print("Gamelog: request was Failed, messsage_id: %d \n" % int(msg_id))
-
 
 if __name__ == '__main__':
     cmd = GamelogCmd()
     for i in sys.stdin.readlines():
         cmd.next_tuple(i)
+    print 'Total: ', self.count
 
     

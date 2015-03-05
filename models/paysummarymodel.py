@@ -37,6 +37,9 @@ class PaySummaryModel(MongoModel):
                 pay_count += vuser['times']
                 pay_amout += vuser['amount']
 
+            ## Someone write 'create' to 'creat', 'amount' to 'amout' and so on
+            ## for consistent with previous data,
+            ## I have to make the misktake , (..
             fix_data = {
                 'game' : game,
                 'area' : area, 

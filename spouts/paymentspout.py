@@ -80,10 +80,13 @@ class PaymentSpout(BaseSpout):
 
         return self.call(url, {}, params)
 
-    def next_tuple(self):
+    def next_tuple(self, period_ts=''):
         self.logger.info('%-10s Starting read the data ...', 'Payment')
         search_list = []
-        ts = get_period_ts(interval='day')
+        if not period_ts:
+            ts = get_period_ts(interval='day')
+        else:
+            ts = period_ts
         search = { 
             'start' : ts['start'],
             'end' : ts['end'],

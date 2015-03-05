@@ -53,14 +53,16 @@ class UserPayModel(MongoModel):
                 ## consume record, used_yuanbao
                 if yuanbao_amount > 0:
                     return
+                else: 
+                    used_yuanbao = abs(yuanbao_amount)
                 if result:
-                    search['used_yuanbao'] = abs(yuanbao_amount)
+                    search['used_yuanbao'] = used_yuanbao
                     if result.get('used_yuanbao', 0):
                         search['used_yuanbao'] += result['used_yuanbao']
                     mid = str(result['_id'])
                     self.update(mid, search)
                 else:
-                    search['used_yuanbao'] = abs(yuanbao_amount)
+                    search['used_yuanbao'] = used_yuanbao
                     self.insert(search)
             else:
                 ## charge record, count, yuanbao, amount

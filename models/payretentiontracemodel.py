@@ -1,11 +1,11 @@
 from common.mongo import MongoModel
-from models.createroledaymodel import CreateroleDayModel
+from models.paysummarymodel import PaySummaryModel
 from configs.config import END_TOPO_SUCCESS
 
 class PayRetentionTraceModel(MongoModel):
     def __init__(self):
         MongoModel.__init__(self)
-        self.createmodel = CreateroleDayModel()
+        self.paysummarymodel = PaySummaryModel()
 
     def get_db(self):
         return 'analytics'
@@ -18,7 +18,7 @@ class PayRetentionTraceModel(MongoModel):
 
     def get_conf(self):
         conf = {
-            'sub_conf' : ['paysummary'],
+            'sub_conf' : ['createrole'],
             'state' : 'payretentiontrace'
         }
         return conf
@@ -31,7 +31,7 @@ class PayRetentionTraceModel(MongoModel):
             ts = recv_body['ts']
 
             # update retention
-            pay_user_list = recv_body['userlist']
+            createrole_list = recv_body['userlist']
             for i in range(0, 31):
                 if i <= 7 or i == 14 or i == 30:
                     start = ts - i * 3600 * 24
@@ -40,32 +40,33 @@ class PayRetentionTraceModel(MongoModel):
                         'plat' : plat,
                         'ts' : start
                     }
-                    createrole = self.createmodel.get_one(search, {'userlist' : 1})
-                    if createrole:
-                        if len(createrole['userlist']) <= len(pay_user_list):
-                            user_fix = dict.fromkeys([x for x in createrole['userlist'] \
-                                                      if x in pay_user_list])
-                        else:
-                            user_fix = dict.fromkeys([x for x in pay_user_list \
-                                                          if x in createrole['userlist']])
-                        if not(len(user_fix)):
-                            continue
+                    paysummary = self.paysummarymodel.get_one(search, {'userlist' : 1})
+                    result = self.get_one(search, {'_id' : 1})
 
-                        result = self.get_one(search, {'_id' : 1})
-                        search['create_role_count'] = len(createrole['userlist'])
+                    if paysummary:
+                        if len(createrole_list) <= len(paysummary['userlist']):
+                            user_fix = dict.fromkeys(x for x in createrole_list \
+                                                     if x in paysummary['userlist'])
+                        else:
+                            user_fix = dict.fromkeys([x for x in  paysummary['userlist']\
+                                                          if x in createrole_list])
                         if i > 0:
                             search[str(i) + '_retention'] = len(user_fix)
                         else:
+                            search['create_role_count'] = len(createrole_list)
                             search['pay_user_count'] = len(user_fix)
-
-                        if result:
-                            mid = str(result['_id'])
-                            self.update(mid, search)
+                    else: # paysummary is emtpy
+                        if i > 0:
+                            search[str(i) + '_retention'] = 0
                         else:
-                            search['game'] = game
-                            self.insert(search)
-                            
-                    else: # createrole is emtpy
-                        continue
+                            search['create_role_count'] = len(createrole_list)
+                            search['pay_user_count'] = 0
+
+                    if result:
+                        mid = str(result['_id'])
+                        self.update(mid, search)
+                    else:
+                        search['game'] = game
+                        self.insert(search)
 
             return END_TOPO_SUCCESS

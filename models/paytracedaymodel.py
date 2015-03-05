@@ -50,7 +50,10 @@ class PayTraceDayModel(MongoModel):
         for kuser, vuser in users.items():
             pay_userlist.append(kuser)
         
-        search = {'area' : area, 'plat' : plat}
+        search = {
+            'area' : area,
+            'plat' : plat
+        }
         before_pay = self.paymodel.get_list(search, {'userlist':1})
         before_pay_userlist = []
         for each_pay in before_pay:
@@ -82,8 +85,11 @@ class PayTraceDayModel(MongoModel):
         search['new_pay_user_amout'] = 0
         
         search['today_total_pay_user_count'] = len(pay_userlist)
-        search['today_createrole_pay_user_count'] = len(paytoday_createrole_userlist)
-        search['today_createrole_count'] = len(create_userlist)
+        ## Someone write 'create' to 'creat', 'amount' to 'amout' and so on
+        ## for consistent with previous data,
+        ## I have to make the misktake , (..
+        search['today_creatrole_pay_user_count'] = len(paytoday_createrole_userlist)
+        search['today_creatrole_count'] = len(create_userlist)
 
         for each_user in old_pay_user:
             search['old_pay_user_count_a'] += users[each_user]['times']

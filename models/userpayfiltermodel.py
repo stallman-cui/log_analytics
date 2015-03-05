@@ -25,14 +25,14 @@ class UserPayFilterModel(MongoModel):
                 plat_arr = recv_body['data']['URS'].split('_')
                 ts = recv_body['ts']
                 new = str(recv_body['data']['extra']['new_yuanbao'])
-                old = str(recv_body['data']['extra']['old_yuanbao'])
                 uid = str(recv_body['data']['Uid'])
+                amount = recv_body['data']['amount']
             except KeyError as e:
                 print 'Key error: ', str(e)
                 return
 
             plat = str(plat_arr[len(plat_arr) -2])
-            record_key = '_'.join([str(ts), new, old])
+            record_key = '_'.join([str(ts), new, str(amount)])
             search = {
                 'area' : area,
                 'plat' : plat,
@@ -40,6 +40,7 @@ class UserPayFilterModel(MongoModel):
                 'ts' : get_ts(ts, interval='day'),
             }
             result = self.get_one(search, {'userlist':1})
+            ts = get_ts(ts, interval='day')
             if result:
                 search['userlist'] = result['userlist']
                 if record_key not in result['userlist']:
