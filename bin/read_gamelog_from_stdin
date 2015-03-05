@@ -59,6 +59,6 @@ if __name__ == '__main__':
     cmd = GamelogCmd()
     for i in sys.stdin.readlines():
         cmd.next_tuple(i)
-    print 'Total: ', self.count
+    print 'Total: ', cmd.count
 
     
