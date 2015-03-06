@@ -21,7 +21,11 @@ area_file = os.path.join(basedir, 'game_area_plat.json')
 def gamelog_parse(line):
     m = re.match(r'(\w+)\t\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\t(.*)', line)
     if m:
-        data = json.loads(m.group(3))    
+        try:
+            data = json.loads(m.group(3))
+        except ValueError as e:
+            print('ValueError: ', str(e))
+            return
         if data.get('opname', 0) and data.get('opno', 0):
             area = m.group(1)
             ts = time.strptime(m.group(2), precise_format)

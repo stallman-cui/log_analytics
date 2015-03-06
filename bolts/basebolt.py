@@ -7,7 +7,6 @@ from configs.config import PUBTITLE, END_TOPO_SUCCESS
 class BaseBolt():
     ''' handle the login log from gamelog
     '''
-    num = 0
     def __init__(self, model, topology_context='', output_collector=''):
         self.logger = logging.getLogger('online_analytics')
         self.model = model()
@@ -42,10 +41,6 @@ class BaseBolt():
             recv_tuple = input[4:]
             recv_tuple = json.loads(recv_tuple)
             self.num += 1
-            BaseBolt.num += 1
-            if BaseBolt.num % 1000 == 0:
-                self.logger.info('%-30s execute message id: %d ', self.model.__module__, recv_tuple['id'])
-            
             body = self.model.handle(recv_tuple['body'])
             #self.logger.debug('%-30s recv_body: %s: ', self.model.__module__, body)
             if body:

@@ -21,6 +21,7 @@ class Transfer():
     # Publish all the messages
     def sender(self):
         send_socket = self.context.socket(zmq.PUB)
+        send_socket.setsockopt(zmq.SNDHWM, 50000)
         send_socket.bind(send_addr)
         while True:
             if not self.messages.empty():
