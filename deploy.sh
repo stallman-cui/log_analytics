@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#[ $EUID -ne 0 ] && echo 'root needed' && exit 1
+[ $EUID -ne 0 ] && echo 'root needed' && exit 1
 SSH_USER=mhgame
 
 ECHO='printf "\r%s\n"'
@@ -11,7 +11,7 @@ $E_LINE '1. install pip'
 which pip >> /dev/null
 if [ $? -ne 0 ]; then
     $ECHO 'Please install "pip" frist' 
-    apt-get -q=2 install python-pip
+    apt-get -q=2 install python-pip libffi-dev 
 fi
 
 #2. install python extension
@@ -21,8 +21,8 @@ pip -q install PyYAML bson pycurl greenlet pymongo pyzmq gevent
 
 git clone https://github.com/jplana/python-etcd
 if [ -e python-etcd ]; then
-    cd python-etcd && python setup.py
-    [ $? -ne 0] && $ECHO 'install python-etcd failed' && exit 1
+    cd python-etcd && python setup.py install
+    [ $? -ne 0 ] && $ECHO 'install python-etcd failed' && exit 1
     cd ..
     rm -rf python-etcd
 fi
