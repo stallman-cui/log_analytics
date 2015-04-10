@@ -24,7 +24,7 @@ class CreateroleHourModel(MongoModel):
                 game = recv_body['game']
                 area = recv_body['area']
                 plat = str(recv_body['data']['corpid'])
-                acctid = str(recv_body['data']['acct'])
+                acctid = recv_body['data']['acct']
                 ts = recv_body['ts']
             except KeyError as e:
                 print 'Key error: ', str(e)

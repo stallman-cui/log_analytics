@@ -1,3 +1,5 @@
+import time
+
 from common.mongo import MongoModel 
 from configs.config import END_TOPO_SUCCESS
 
@@ -33,6 +35,7 @@ class CombatModel(MongoModel):
                         'game' : game,
                         'area' : karea,
                         'plat' : kplat,
+			'ts' : int(time.time()),
                         'userlist' : plat_users
                     }
                     self.upsert(fix_data)

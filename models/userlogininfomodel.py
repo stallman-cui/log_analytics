@@ -26,7 +26,7 @@ class UserLoginInfoModel(MongoModel):
             try:
                 game = recv_body['game']
                 area = recv_body['area']
-                acctid = str(recv_body['data']['acct'])
+                acctid = recv_body['data']['acct']
                 log_type = recv_body['data']['type']
                 ts = recv_body['ts']
                 plat = str(recv_body['data']['corpid'])
