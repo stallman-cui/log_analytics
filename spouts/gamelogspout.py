@@ -56,6 +56,7 @@ class GamelogSpout(BaseSpout):
             with open(out_file, 'r') as f:
                 for line in f:
                     line = gamelog_parse(line)
+                    self.model.handle(line)
                     if line:
                         line = gamelog_filter(line)
                         if line:
