@@ -28,7 +28,7 @@ class GamelogRemote():
         self.socket.connect("tcp://127.0.0.1:5000")
 
     def next_tuple(self, time_after, time_before):
-        print('gamelog from remote [{}, {}]'.format(time_after, time_before))
+        print('gamelog from remote [{0}, {1}]'.format(time_after, time_before))
         basedir, bin = os.path.split(os.path.dirname(os.path.abspath(__file__)))
         data_dir = os.path.join(basedir, 'data')
         FORMAT = '%Y%m%d%H%M'

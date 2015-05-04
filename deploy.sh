@@ -8,6 +8,7 @@ E_LINE='printf "\r%s\n" ---------------------------------'
 
 #1. install pip
 $E_LINE '1. install pip'
+apt-get -q=2 install g++
 which pip >> /dev/null
 if [ $? -ne 0 ]; then
     $ECHO 'Please install "pip" frist' 
@@ -16,7 +17,7 @@ fi
 
 #2. install python extension
 $E_LINE '2. install python extension'
-pip -q install PyYAML bson pycurl greenlet pymongo pyzmq gevent
+pip -q install PyYAML bson pycurl greenlet pymongo pyzmq gevent argparse
 [ $? -ne 0 ] && $ECHO 'install python extension failed' && exit 1
 
 git clone https://github.com/jplana/python-etcd

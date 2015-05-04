@@ -12,7 +12,7 @@ from models.paymentmodel import PaymentModel
 from analyticslib.lib import get_period_ts, get_ts
 
 class PaymentSpout(BaseSpout):
-    timer = 60 * 60
+    timer = 60 * 5
     
     def __init__(self):
         BaseSpout.__init__(self, model=PaymentModel)

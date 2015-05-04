@@ -51,9 +51,9 @@ class LoginRetentionModel(MongoModel):
                     if result:
                         if i > 0:
                             if acctid in createrole['userlist']:
-                                search[str(i) + 'retention'] = 1
-                                if result.get(str(i) + 'retention', 0):
-                                    search[str(i) + 'retention'] += result[str(i) + 'retention']
+                                search[str(i) + '_retention'] = 1
+                                if result.get(str(i) + '_retention', 0):
+                                    search[str(i) + '_retention'] += result[str(i) + '_retention']
                             else:
                                 continue
                         else: 
