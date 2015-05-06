@@ -53,7 +53,7 @@ class GamelogSpout(BaseSpout):
                 if line:
                     valid_line = gamelog_filter(line)
                     if valid_line:
-                        valine_line['game'] = areas[valid_line['area']]
+                        valid_line['game'] = areas[valid_line['area']]
                         message_tuple = {
                             'body' : valid_line,
                             'state' : valid_line['op']['code']
