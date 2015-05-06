@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+import zmq.green as zmq
+import subprocess
+import logging
+import sys
+import os
+
+basedir, bin = os.path.split(os.path.dirname(os.path.abspath(sys.argv[0])))
+sys.path.insert(0, basedir)
+from models.hostmodel import HostModel
+from configs.config import ssh_user
+from analyticslib.lib import *
+
+class GamelogRemote():
+    """ read the gamelog data,
+    and send it
+    """
+    def __init__(self):
+        self.open()
+        #set_game_area_plat()
+        self.count = 0
+        self.hm = HostModel()
+
+    def open(self, conf='', topology_context='', output_collector=''):
+        ''' Called when a task for this component is initialized '''
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect("tcp://127.0.0.1:5000")
+
+    def next_tuple(self, date):
+        print('gamelog from remote date [{0}]'.format(date))
+        basedir, bin = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+        data_dir = os.path.join(basedir, 'data')
+        FORMAT = '%Y%m%d%H%M'
+        time_now = time.strftime(FORMAT, time.localtime())
+        time_stamp = (int(time.mktime(time.strptime(time_now, FORMAT))))
+        out_file = os.path.join(data_dir, 'gamelog_day_' + time.strftime('%Y%m%d', time.localtime(time_stamp)) + '.txt')
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+        f = open(out_file, 'a')
+        set_game_area_plat()
+        areas = get_game_area_plat()['area']
+        hosts = self.hm.get_list({'flag.available' : True, 'id': 's31.machine.millionhero.com'})
+        for host in hosts:
+            host = host['id']
+            command = ('for g in /home/mhgame/games/*;' 
+                       'do find $g/log/gamelog -name mh_{0}*.log | xargs sed -e "s/^/$(basename $g)\t/";' 
+                       'done 2>/dev/null').format(date)
+            remote_user_host = str(ssh_user) + '@' + host
+            ssh = subprocess.Popen(["ssh", "-C", remote_user_host, command],
+                                   shell=False,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE
+            )
+            for line in  ssh.stdout.readlines():
+                f.write(str(line))
+        f.close()
+        try:
+            with open(out_file, 'r') as f:
+                for line in f:
+                    line = gamelog_parse(line)
+                    if line:
+                        line = gamelog_filter(line)
+                        if line:
+                            line['game'] = areas[line['area']]
+                            message_tuple = {
+                                'body' : line,
+                                'state' : line['op']['code']
+                            }
+                            self.count += 1
+                            self.socket.send_json(message_tuple)
+                            ack_no = self.socket.recv_string()
+                            if ack_no != 'Error':
+                                self.ack(ack_no)
+                            else:
+                                self.fail(ack_no)
+        except IOError as e:
+            print('Gamelog read Error: %s', str(e))
+            
+    def ack(self, msg_id):
+        ''' The tuple emiited by this spout with the msg_id has been fully processed. '''
+        #print("Gamelog: request was Sucessed, messsage_id: %d \n" % int(msg_id))
+        print '.',
+
+    def fail(self, msg_id):
+        ''' The tuple emitted by this spout with the msg_id has filed to be fully processed. '''
+        print("Gamelog: request was Failed, messsage_id: %d \n" % int(msg_id))
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage: ", sys.argv[0], 'date')
+        print(sys.argv[0], '20150409')
+        sys.exit(0)
+
+    remote = GamelogRemote()
+    remote.next_tuple(sys.argv[1])
+    
+    print '\nTotal: ', remote.count

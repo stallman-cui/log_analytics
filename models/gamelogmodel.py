@@ -1,5 +1,4 @@
 from common.mongo import MongoModel
-from configs.config import END_TOPO_SUCCESS
 
 class GamelogModel(MongoModel):
     def get_db(self):
@@ -20,5 +19,4 @@ class GamelogModel(MongoModel):
     def handle(self, recv_body):
         if recv_body:
             self.insert(recv_body)
-        return END_TOPO_SUCCESS
 

@@ -32,7 +32,6 @@ class GamelogSpout(BaseSpout):
         if os.path.exists(out_file):
             os.remove(out_file)
 
-        f = open(out_file, 'a')
         set_game_area_plat()
         areas = get_game_area_plat()['area']
         hosts = self.hm.get_list({'flag.available' : True})
@@ -44,35 +43,28 @@ class GamelogSpout(BaseSpout):
                        'do find $g/log/gamelog -name mh_$t.log | xargs sed -e "s/^/$(basename $g)\t/";' 
                        'done 2>/dev/null')
             remote_user_host = str(ssh_user) + '@' + host
-            ssh = subprocess.Popen(["ssh", remote_user_host, command],
+            ssh = subprocess.Popen(["ssh", '-C', remote_user_host, command],
                                    shell=False,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE
             )
             for line in  ssh.stdout.readlines():
-                f.write(str(line))
-        f.close()
-        try:
-            with open(out_file, 'r') as f:
-                for line in f:
-                    line = gamelog_parse(line)
+                line = gamelog_parse(line)
+                if line:
                     self.model.handle(line)
+                    line = gamelog_filter(line)
                     if line:
-                        line = gamelog_filter(line)
-                        if line:
-                            line['game'] = areas[line['area']]
-                            message_tuple = {
-                                'body' : line,
-                                'state' : line['op']['code']
-                            }
-                            self.count += 1
-                            self.socket.send_json(message_tuple)
-                            ack_no = self.socket.recv_string()
-                            if ack_no != 'Error':
-                                self.ack(ack_no)
-                            else:
-                                self.fail(ack_no)
-        except IOError as e:
-            self.logger.error('Gamelog read Error: %s', str(e))
-            
+                        line['game'] = areas[line['area']]
+                        message_tuple = {
+                            'body' : line,
+                            'state' : line['op']['code']
+                        }
+                        self.count += 1
+                        self.socket.send_json(message_tuple)
+                        ack_no = self.socket.recv_string()
+                        if ack_no != 'Error':
+                            self.ack(ack_no)
+                        else:
+                            self.fail(ack_no)
+
         self.logger.info('%-10s End the read data ...', 'Gamelog')
