@@ -51,13 +51,12 @@ class GamelogSpout(BaseSpout):
             for line in  ssh.stdout.readlines():
                 line = gamelog_parse(line)
                 if line:
-                    self.model.handle(line)
-                    line = gamelog_filter(line)
-                    if line:
-                        line['game'] = areas[line['area']]
+                    valid_line = gamelog_filter(line)
+                    if valid_line:
+                        valine_line['game'] = areas[valid_line['area']]
                         message_tuple = {
-                            'body' : line,
-                            'state' : line['op']['code']
+                            'body' : valid_line,
+                            'state' : valid_line['op']['code']
                         }
                         self.count += 1
                         self.socket.send_json(message_tuple)
@@ -66,5 +65,8 @@ class GamelogSpout(BaseSpout):
                             self.ack(ack_no)
                         else:
                             self.fail(ack_no)
+
+                    self.model.handle(line)
+
 
         self.logger.info('%-10s End the read data ...', 'Gamelog')
