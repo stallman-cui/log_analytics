@@ -156,7 +156,7 @@ class PaymentSpout(BaseSpout):
                             'game' : kgame,
                             'area' : karea,
                             'plat' : str(kplat),
-                            'ts' : ts['start'],
+                            'ts' : each_search['start'],
                             'users': vplat
                         }
                         message_tuple = {
